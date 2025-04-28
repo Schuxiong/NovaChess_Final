@@ -1,0 +1,337 @@
+package org.jeecg.modules.chess.game.service;
+
+
+import org.jeecg.common.util.UUIDGenerator;
+import org.jeecg.modules.chess.game.entity.ChessPieces;
+import org.springframework.stereotype.Service;
+
+import java.util.LinkedList;
+import java.util.List;
+
+@Service
+public class ChessPiecesPositionService {
+
+
+    public List<ChessPieces> obtainChessPiecesList(String chessGameId){
+        List<ChessPieces> lstChessPieces = new LinkedList<>();
+
+        return lstChessPieces;
+    }
+
+    private List<ChessPieces> obtainChessPieces(String chessGameId,String chessPiecesName){
+        List<ChessPieces> lstChessPieces = new LinkedList<>();
+
+        switch (chessPiecesName){
+            case "King":
+                ChessPieces objBlackKing = new ChessPieces();
+                objBlackKing.setId(UUIDGenerator.generate());
+                objBlackKing.setChessGameId(chessGameId);
+                objBlackKing.setPiecesState(1);
+                objBlackKing.setChessPiecesName(chessPiecesName);
+                objBlackKing.setPiecesType(1);
+                objBlackKing.setPositionX("E");
+                objBlackKing.setPositionY("8");
+                lstChessPieces.add(objBlackKing);
+
+                ChessPieces objWhiteKing = new ChessPieces();
+                objWhiteKing.setId(UUIDGenerator.generate());
+                objWhiteKing.setChessGameId(chessGameId);
+                objWhiteKing.setPiecesState(1);
+                objWhiteKing.setChessPiecesName(chessPiecesName);
+                objWhiteKing.setPiecesType(2);
+                objWhiteKing.setPositionX("E");
+                objWhiteKing.setPositionY("1");
+                lstChessPieces.add(objWhiteKing);
+                break;
+            case "Queen":
+                ChessPieces objBlackQueen = new ChessPieces();
+                objBlackQueen.setId(UUIDGenerator.generate());
+                objBlackQueen.setChessGameId(chessGameId);
+                objBlackQueen.setPiecesState(1);
+                objBlackQueen.setChessPiecesName(chessPiecesName);
+                objBlackQueen.setPiecesType(1);
+                objBlackQueen.setPositionX("D");
+                objBlackQueen.setPositionY("8");
+                lstChessPieces.add(objBlackQueen);
+
+                ChessPieces objWhiteQueen = new ChessPieces();
+                objWhiteQueen.setId(UUIDGenerator.generate());
+                objWhiteQueen.setChessGameId(chessGameId);
+                objWhiteQueen.setPiecesState(1);
+                objWhiteQueen.setChessPiecesName(chessPiecesName);
+                objWhiteQueen.setPiecesType(2);
+                objWhiteQueen.setPositionX("D");
+                objWhiteQueen.setPositionY("1");
+                lstChessPieces.add(objWhiteQueen);
+                break;
+            case "Rook":
+                ChessPieces objBlackRookLeft = new ChessPieces();
+                objBlackRookLeft.setId(UUIDGenerator.generate());
+                objBlackRookLeft.setChessGameId(chessGameId);
+                objBlackRookLeft.setPiecesState(1);
+                objBlackRookLeft.setChessPiecesName(chessPiecesName);
+                objBlackRookLeft.setPiecesType(1);
+                objBlackRookLeft.setPositionX("A");
+                objBlackRookLeft.setPositionY("8");
+                lstChessPieces.add(objBlackRookLeft);
+                ChessPieces objBlackRookRight = new ChessPieces();
+                objBlackRookRight.setId(UUIDGenerator.generate());
+                objBlackRookRight.setChessGameId(chessGameId);
+                objBlackRookRight.setPiecesState(1);
+                objBlackRookRight.setChessPiecesName(chessPiecesName);
+                objBlackRookRight.setPiecesType(1);
+                objBlackRookRight.setPositionX("H");
+                objBlackRookRight.setPositionY("8");
+                lstChessPieces.add(objBlackRookRight);
+
+                ChessPieces objWhiteRookLeft = new ChessPieces();
+                objWhiteRookLeft.setId(UUIDGenerator.generate());
+                objWhiteRookLeft.setChessGameId(chessGameId);
+                objWhiteRookLeft.setPiecesState(1);
+                objWhiteRookLeft.setChessPiecesName(chessPiecesName);
+                objWhiteRookLeft.setPiecesType(2);
+                objWhiteRookLeft.setPositionX("A");
+                objWhiteRookLeft.setPositionY("1");
+                lstChessPieces.add(objWhiteRookLeft);
+                ChessPieces objWhiteRookRight = new ChessPieces();
+                objWhiteRookRight.setId(UUIDGenerator.generate());
+                objWhiteRookRight.setChessGameId(chessGameId);
+                objWhiteRookRight.setPiecesState(1);
+                objWhiteRookRight.setChessPiecesName(chessPiecesName);
+                objWhiteRookRight.setPiecesType(2);
+                objWhiteRookRight.setPositionX("H");
+                objWhiteRookRight.setPositionY("1");
+                lstChessPieces.add(objWhiteRookRight);
+                break;
+            case "Bishop":
+                ChessPieces objBlackBishopLeft = new ChessPieces();
+                objBlackBishopLeft.setId(UUIDGenerator.generate());
+                objBlackBishopLeft.setChessGameId(chessGameId);
+                objBlackBishopLeft.setPiecesState(1);
+                objBlackBishopLeft.setChessPiecesName(chessPiecesName);
+                objBlackBishopLeft.setPiecesType(1);
+                objBlackBishopLeft.setPositionX("C");
+                objBlackBishopLeft.setPositionY("8");
+                lstChessPieces.add(objBlackBishopLeft);
+                ChessPieces objBlackBishopRight = new ChessPieces();
+                objBlackBishopRight.setId(UUIDGenerator.generate());
+                objBlackBishopRight.setChessGameId(chessGameId);
+                objBlackBishopRight.setPiecesState(1);
+                objBlackBishopRight.setChessPiecesName(chessPiecesName);
+                objBlackBishopRight.setPiecesType(1);
+                objBlackBishopRight.setPositionX("F");
+                objBlackBishopRight.setPositionY("8");
+                lstChessPieces.add(objBlackBishopRight);
+
+                ChessPieces objWhiteBishopLeft = new ChessPieces();
+                objWhiteBishopLeft.setId(UUIDGenerator.generate());
+                objWhiteBishopLeft.setChessGameId(chessGameId);
+                objWhiteBishopLeft.setPiecesState(1);
+                objWhiteBishopLeft.setChessPiecesName(chessPiecesName);
+                objWhiteBishopLeft.setPiecesType(2);
+                objWhiteBishopLeft.setPositionX("C");
+                objWhiteBishopLeft.setPositionY("1");
+                lstChessPieces.add(objWhiteBishopLeft);
+                ChessPieces objWhiteBishopRight = new ChessPieces();
+                objWhiteBishopRight.setId(UUIDGenerator.generate());
+                objWhiteBishopRight.setChessGameId(chessGameId);
+                objWhiteBishopRight.setPiecesState(1);
+                objWhiteBishopRight.setChessPiecesName(chessPiecesName);
+                objWhiteBishopRight.setPiecesType(2);
+                objWhiteBishopRight.setPositionX("F");
+                objWhiteBishopRight.setPositionY("1");
+                lstChessPieces.add(objWhiteBishopRight);
+                break;
+            case "Knight":
+                ChessPieces objBlackKnightLeft = new ChessPieces();
+                objBlackKnightLeft.setId(UUIDGenerator.generate());
+                objBlackKnightLeft.setChessGameId(chessGameId);
+                objBlackKnightLeft.setPiecesState(1);
+                objBlackKnightLeft.setChessPiecesName(chessPiecesName);
+                objBlackKnightLeft.setPiecesType(1);
+                objBlackKnightLeft.setPositionX("B");
+                objBlackKnightLeft.setPositionY("8");
+                lstChessPieces.add(objBlackKnightLeft);
+                ChessPieces objBlackKnightRight = new ChessPieces();
+                objBlackKnightRight.setId(UUIDGenerator.generate());
+                objBlackKnightRight.setChessGameId(chessGameId);
+                objBlackKnightRight.setPiecesState(1);
+                objBlackKnightRight.setChessPiecesName(chessPiecesName);
+                objBlackKnightRight.setPiecesType(1);
+                objBlackKnightRight.setPositionX("G");
+                objBlackKnightRight.setPositionY("8");
+                lstChessPieces.add(objBlackKnightRight);
+
+                ChessPieces objWhiteKnightLeft = new ChessPieces();
+                objWhiteKnightLeft.setId(UUIDGenerator.generate());
+                objWhiteKnightLeft.setChessGameId(chessGameId);
+                objWhiteKnightLeft.setPiecesState(1);
+                objWhiteKnightLeft.setChessPiecesName(chessPiecesName);
+                objWhiteKnightLeft.setPiecesType(2);
+                objWhiteKnightLeft.setPositionX("B");
+                objWhiteKnightLeft.setPositionY("1");
+                lstChessPieces.add(objWhiteKnightLeft);
+                ChessPieces objWhiteKnightRight = new ChessPieces();
+                objWhiteKnightRight.setId(UUIDGenerator.generate());
+                objWhiteKnightRight.setChessGameId(chessGameId);
+                objWhiteKnightRight.setPiecesState(1);
+                objWhiteKnightRight.setChessPiecesName(chessPiecesName);
+                objWhiteKnightRight.setPiecesType(2);
+                objWhiteKnightRight.setPositionX("G");
+                objWhiteKnightRight.setPositionY("1");
+                lstChessPieces.add(objWhiteKnightRight);
+                break;
+            case "Pawn":
+                ChessPieces objBlackPawn1 = new ChessPieces();
+                objBlackPawn1.setId(UUIDGenerator.generate());
+                objBlackPawn1.setChessGameId(chessGameId);
+                objBlackPawn1.setPiecesState(1);
+                objBlackPawn1.setChessPiecesName(chessPiecesName);
+                objBlackPawn1.setPiecesType(1);
+                objBlackPawn1.setPositionX("A");
+                objBlackPawn1.setPositionY("7");
+                lstChessPieces.add(objBlackPawn1);
+                ChessPieces objBlackPawn2 = new ChessPieces();
+                objBlackPawn2.setId(UUIDGenerator.generate());
+                objBlackPawn2.setChessGameId(chessGameId);
+                objBlackPawn2.setPiecesState(1);
+                objBlackPawn2.setChessPiecesName(chessPiecesName);
+                objBlackPawn2.setPiecesType(1);
+                objBlackPawn2.setPositionX("B");
+                objBlackPawn2.setPositionY("7");
+                lstChessPieces.add(objBlackPawn2);
+                ChessPieces objBlackPawn3 = new ChessPieces();
+                objBlackPawn3.setId(UUIDGenerator.generate());
+                objBlackPawn3.setChessGameId(chessGameId);
+                objBlackPawn3.setPiecesState(1);
+                objBlackPawn3.setChessPiecesName(chessPiecesName);
+                objBlackPawn3.setPiecesType(1);
+                objBlackPawn3.setPositionX("C");
+                objBlackPawn3.setPositionY("7");
+                lstChessPieces.add(objBlackPawn3);
+                ChessPieces objBlackPawn4 = new ChessPieces();
+                objBlackPawn4.setId(UUIDGenerator.generate());
+                objBlackPawn4.setChessGameId(chessGameId);
+                objBlackPawn4.setPiecesState(1);
+                objBlackPawn4.setChessPiecesName(chessPiecesName);
+                objBlackPawn4.setPiecesType(1);
+                objBlackPawn4.setPositionX("D");
+                objBlackPawn4.setPositionY("7");
+                lstChessPieces.add(objBlackPawn4);
+                ChessPieces objBlackPawn5 = new ChessPieces();
+                objBlackPawn5.setId(UUIDGenerator.generate());
+                objBlackPawn5.setChessGameId(chessGameId);
+                objBlackPawn5.setPiecesState(1);
+                objBlackPawn5.setChessPiecesName(chessPiecesName);
+                objBlackPawn5.setPiecesType(1);
+                objBlackPawn5.setPositionX("E");
+                objBlackPawn5.setPositionY("7");
+                lstChessPieces.add(objBlackPawn5);
+                ChessPieces objBlackPawn6 = new ChessPieces();
+                objBlackPawn6.setId(UUIDGenerator.generate());
+                objBlackPawn6.setChessGameId(chessGameId);
+                objBlackPawn6.setPiecesState(1);
+                objBlackPawn6.setChessPiecesName(chessPiecesName);
+                objBlackPawn6.setPiecesType(1);
+                objBlackPawn6.setPositionX("F");
+                objBlackPawn6.setPositionY("7");
+                lstChessPieces.add(objBlackPawn6);
+                ChessPieces objBlackPawn7 = new ChessPieces();
+                objBlackPawn7.setId(UUIDGenerator.generate());
+                objBlackPawn7.setChessGameId(chessGameId);
+                objBlackPawn7.setPiecesState(1);
+                objBlackPawn7.setChessPiecesName(chessPiecesName);
+                objBlackPawn7.setPiecesType(1);
+                objBlackPawn7.setPositionX("G");
+                objBlackPawn7.setPositionY("7");
+                lstChessPieces.add(objBlackPawn7);
+                ChessPieces objBlackPawn8 = new ChessPieces();
+                objBlackPawn8.setId(UUIDGenerator.generate());
+                objBlackPawn8.setChessGameId(chessGameId);
+                objBlackPawn8.setPiecesState(1);
+                objBlackPawn8.setChessPiecesName(chessPiecesName);
+                objBlackPawn8.setPiecesType(1);
+                objBlackPawn8.setPositionX("H");
+                objBlackPawn8.setPositionY("7");
+                lstChessPieces.add(objBlackPawn8);
+
+                ChessPieces objWhitePawn1 = new ChessPieces();
+                objWhitePawn1.setId(UUIDGenerator.generate());
+                objWhitePawn1.setChessGameId(chessGameId);
+                objWhitePawn1.setPiecesState(1);
+                objWhitePawn1.setChessPiecesName(chessPiecesName);
+                objWhitePawn1.setPiecesType(2);
+                objWhitePawn1.setPositionX("A");
+                objWhitePawn1.setPositionY("2");
+                lstChessPieces.add(objWhitePawn1);
+                ChessPieces objWhitePawn2 = new ChessPieces();
+                objWhitePawn2.setId(UUIDGenerator.generate());
+                objWhitePawn2.setChessGameId(chessGameId);
+                objWhitePawn2.setPiecesState(1);
+                objWhitePawn2.setChessPiecesName(chessPiecesName);
+                objWhitePawn2.setPiecesType(2);
+                objWhitePawn2.setPositionX("B");
+                objWhitePawn2.setPositionY("2");
+                lstChessPieces.add(objWhitePawn2);
+                ChessPieces objWhitePawn3 = new ChessPieces();
+                objWhitePawn3.setId(UUIDGenerator.generate());
+                objWhitePawn3.setChessGameId(chessGameId);
+                objWhitePawn3.setPiecesState(1);
+                objWhitePawn3.setChessPiecesName(chessPiecesName);
+                objWhitePawn3.setPiecesType(2);
+                objWhitePawn3.setPositionX("C");
+                objWhitePawn3.setPositionY("2");
+                lstChessPieces.add(objWhitePawn3);
+                ChessPieces objWhitePawn4 = new ChessPieces();
+                objWhitePawn4.setId(UUIDGenerator.generate());
+                objWhitePawn4.setChessGameId(chessGameId);
+                objWhitePawn4.setPiecesState(1);
+                objWhitePawn4.setChessPiecesName(chessPiecesName);
+                objWhitePawn4.setPiecesType(2);
+                objWhitePawn4.setPositionX("D");
+                objWhitePawn4.setPositionY("2");
+                lstChessPieces.add(objWhitePawn4);
+                ChessPieces objWhitePawn5 = new ChessPieces();
+                objWhitePawn5.setId(UUIDGenerator.generate());
+                objWhitePawn5.setChessGameId(chessGameId);
+                objWhitePawn5.setPiecesState(1);
+                objWhitePawn5.setChessPiecesName(chessPiecesName);
+                objWhitePawn5.setPiecesType(2);
+                objWhitePawn5.setPositionX("E");
+                objWhitePawn5.setPositionY("2");
+                lstChessPieces.add(objWhitePawn5);
+                ChessPieces objWhitePawn6 = new ChessPieces();
+                objWhitePawn6.setId(UUIDGenerator.generate());
+                objWhitePawn6.setChessGameId(chessGameId);
+                objWhitePawn6.setPiecesState(1);
+                objWhitePawn6.setChessPiecesName(chessPiecesName);
+                objWhitePawn6.setPiecesType(2);
+                objWhitePawn6.setPositionX("F");
+                objWhitePawn6.setPositionY("2");
+                lstChessPieces.add(objWhitePawn6);
+                ChessPieces objWhitePawn7 = new ChessPieces();
+                objWhitePawn7.setId(UUIDGenerator.generate());
+                objWhitePawn7.setChessGameId(chessGameId);
+                objWhitePawn7.setPiecesState(1);
+                objWhitePawn7.setChessPiecesName(chessPiecesName);
+                objWhitePawn7.setPiecesType(2);
+                objWhitePawn7.setPositionX("G");
+                objWhitePawn7.setPositionY("2");
+                lstChessPieces.add(objWhitePawn7);
+                ChessPieces objWhitePawn8 = new ChessPieces();
+                objWhitePawn8.setId(UUIDGenerator.generate());
+                objWhitePawn8.setChessGameId(chessGameId);
+                objWhitePawn8.setPiecesState(1);
+                objWhitePawn8.setChessPiecesName(chessPiecesName);
+                objWhitePawn8.setPiecesType(2);
+                objWhitePawn8.setPositionX("H");
+                objWhitePawn8.setPositionY("2");
+                lstChessPieces.add(objBlackPawn8);
+                break;
+
+
+        }
+        return lstChessPieces;
+
+    }
+}

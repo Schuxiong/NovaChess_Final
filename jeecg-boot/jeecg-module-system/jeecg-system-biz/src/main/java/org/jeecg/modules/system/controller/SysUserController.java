@@ -168,9 +168,7 @@ public class SysUserController {
 			//用户表字段org_code不能在这里设置他的值
             user.setOrgCode(null);
 			// 保存用户走一个service 保证事务
-            //获取租户ids
-            String relTenantIds = jsonObject.getString("relTenantIds");
-            sysUserService.saveUser(user, selectedRoles, selectedDeparts, relTenantIds);
+            sysUserService.saveUser(user, selectedRoles, selectedDeparts, null);
             baseCommonService.addLog("添加用户，username： " +user.getUsername() ,CommonConstant.LOG_TYPE_2, 2);
 			result.success("添加成功！");
 		} catch (Exception e) {
@@ -196,10 +194,6 @@ public class SysUserController {
 				user.setPassword(sysUser.getPassword());
 				String roles = jsonObject.getString("selectedroles");
                 String departs = jsonObject.getString("selecteddeparts");
-                if(oConvertUtils.isEmpty(departs)){
-                    //vue3.0前端只传递了departIds
-                    departs=user.getDepartIds();
-                }
                 //用户表字段org_code不能在这里设置他的值
                 user.setOrgCode(null);
                 // 修改用户走一个service 保证事务

@@ -164,7 +164,7 @@ spring:
     database: 0
     host: 47.103.187.140
     port: 6379
-    password: 'Chess123456'
+    password: '159753456Chu!'
     user: 'r-uf60d3pnxhfqo5fm44'
     username: 'r-uf60d3pnxhfqo5fm44'
     lettuce:

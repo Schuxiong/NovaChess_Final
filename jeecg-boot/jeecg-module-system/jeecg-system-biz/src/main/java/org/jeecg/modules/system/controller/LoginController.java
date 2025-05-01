@@ -149,19 +149,15 @@ public class LoginController {
 			JSONObject obj=new JSONObject();
 			log.info("1 获取用户信息耗时（用户基础信息）" + (System.currentTimeMillis() - start) + "毫秒");
 
-			//update-begin---author:scott ---date:2022-06-20  for：vue3前端，支持自定义首页-----------
-			String vue3Version = request.getHeader(CommonConstant.VERSION);
-			//update-begin---author:liusq ---date:2022-06-29  for：接口返回值修改，同步修改这里的判断逻辑-----------
-			SysRoleIndex roleIndex = sysUserService.getDynamicIndexByUserRole(username, vue3Version);
-			if (oConvertUtils.isNotEmpty(vue3Version) && roleIndex != null && oConvertUtils.isNotEmpty(roleIndex.getUrl())) {
+			// 获取用户首页配置
+			SysRoleIndex roleIndex = sysUserService.getDynamicIndexByUserRole(username, null);
+			if (roleIndex != null && oConvertUtils.isNotEmpty(roleIndex.getUrl())) {
 				String homePath = roleIndex.getUrl();
 				if (!homePath.startsWith(SymbolConstant.SINGLE_SLASH)) {
 					homePath = SymbolConstant.SINGLE_SLASH + homePath;
 				}
 				sysUser.setHomePath(homePath);
 			}
-			//update-begin---author:liusq ---date:2022-06-29  for：接口返回值修改，同步修改这里的判断逻辑-----------
-			//update-end---author:scott ---date::2022-06-20  for：vue3前端，支持自定义首页--------------
 			log.info("2 获取用户信息耗时 (首页面配置)" + (System.currentTimeMillis() - start) + "毫秒");
 			
 			obj.put("userInfo",sysUser);

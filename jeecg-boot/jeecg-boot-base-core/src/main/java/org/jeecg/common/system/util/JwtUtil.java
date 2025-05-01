@@ -128,11 +128,34 @@ public class JwtUtil {
 	 */
 	public static String getUserNameByToken(HttpServletRequest request) throws JeecgBootException {
 		String accessToken = request.getHeader("X-Access-Token");
+		if(accessToken == null) {
+			String authHeader = request.getHeader("Authorization");
+			if(authHeader != null && authHeader.startsWith("Bearer ")) {
+				accessToken = authHeader.substring(7);
+			}
+		}
 		String username = getUsername(accessToken);
 		if (oConvertUtils.isEmpty(username)) {
 			throw new JeecgBootException("未获取到用户");
 		}
 		return username;
+	}
+	
+	/**
+	 * 从请求中获取用户信息
+	 * @param request HTTP请求
+	 * @return 登录用户对象
+	 */
+	public static LoginUser UserInfo(HttpServletRequest request) {
+		try {
+			String username = getUserNameByToken(request);
+			LoginUser user = new LoginUser();
+			user.setUsername(username);
+			return user;
+		} catch (Exception e) {
+			log.error("获取用户信息失败", e);
+			return null;
+		}
 	}
 	
 	/**

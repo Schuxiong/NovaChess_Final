@@ -1,15 +1,21 @@
 package org.jeecg.modules.message.controller;
 
 import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.constant.WebsocketConst;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
+import org.jeecg.common.system.util.JwtUtil;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.message.entity.SysMessage;
 import org.jeecg.modules.message.service.ISysMessageService;
+import org.jeecg.modules.message.websocket.WebSocket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -21,9 +27,13 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.servlet.ModelAndView;
 
+import com.alibaba.fastjson.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,11 +44,15 @@ import lombok.extern.slf4j.Slf4j;
  * @version: V1.0
  */
 @Slf4j
+@Tag(name = "消息管理", description = "消息及聊天相关接口")
 @RestController
 @RequestMapping("/sys/message/sysMessage")
 public class SysMessageController extends JeecgController<SysMessage, ISysMessageService> {
 	@Autowired
 	private ISysMessageService sysMessageService;
+	
+	@Autowired
+	private WebSocket webSocket;
 
 	/**
 	 * 分页列表查询
@@ -49,6 +63,7 @@ public class SysMessageController extends JeecgController<SysMessage, ISysMessag
 	 * @param req
 	 * @return
 	 */
+	@Operation(summary = "分页列表查询")
 	@GetMapping(value = "/list")
 	public Result<?> queryPageList(SysMessage sysMessage, @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
 			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize, HttpServletRequest req) {
@@ -140,6 +155,83 @@ public class SysMessageController extends JeecgController<SysMessage, ISysMessag
 	@PostMapping(value = "/importExcel")
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		return super.importExcel(request, response, SysMessage.class);
+	}
+	
+	/**
+	 * 获取聊天记录
+	 * 
+	 * @param senderId 发送者ID
+	 * @param receiverId 接收者ID
+	 * @param pageNo 页码
+	 * @param pageSize 每页记录数
+	 * @return
+	 */
+	@Operation(summary = "获取聊天记录")
+	@GetMapping("/getChatHistory")
+	public Result<?> getChatHistory(
+			@RequestParam(name = "senderId", required = true) String senderId,
+			@RequestParam(name = "receiverId", required = true) String receiverId,
+			@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "20") Integer pageSize) {
+		QueryWrapper<SysMessage> queryWrapper = new QueryWrapper<>();
+		// 查询条件：(发送者=senderId AND 接收者=receiverId) OR (发送者=receiverId AND 接收者=senderId)
+		queryWrapper.and(wrapper -> wrapper
+				.eq("es_sender_id", senderId).eq("es_receiver_id", receiverId)
+				.or()
+				.eq("es_sender_id", receiverId).eq("es_receiver_id", senderId));
+		// 消息类型为聊天消息
+		queryWrapper.eq("es_category", "1");
+		// 按时间排序
+		queryWrapper.orderByDesc("es_send_time");
+		Page<SysMessage> page = new Page<>(pageNo, pageSize);
+		IPage<SysMessage> pageList = sysMessageService.page(page, queryWrapper);
+		return Result.ok(pageList);
+	}
+	
+	/**
+	 * 发送私聊消息
+	 * 
+	 * @param sysMessage 消息对象
+	 * @param request HTTP请求
+	 * @return
+	 */
+	@Operation(summary = "发送私聊消息")
+	@PostMapping("/sendChatMessage")
+	public Result<?> sendChatMessage(@RequestBody SysMessage sysMessage, HttpServletRequest request) {
+		try {
+			// 获取当前登录用户
+			LoginUser sysUser = (LoginUser) request.getAttribute("loginUser");
+			if (sysUser == null) {
+				sysUser = JwtUtil.UserInfo(request);
+			}
+			if (sysUser == null) {
+				return Result.error("用户未登录");
+			}
+			// 设置发送者信息
+			sysMessage.setEsSenderId(sysUser.getId());
+			sysMessage.setEsSenderName(sysUser.getRealname());
+			// 设置消息类型为聊天消息
+			sysMessage.setEsCategory("1");
+			// 设置消息状态为已发送
+			sysMessage.setEsSendStatus("1");
+			// 设置发送时间
+			sysMessage.setEsSendTime(new Date());
+			// 保存消息
+			sysMessageService.save(sysMessage);
+			// 通过WebSocket推送消息给接收者
+			JSONObject obj = new JSONObject();
+			obj.put(WebsocketConst.MSG_CMD, WebsocketConst.CMD_CHAT);
+			obj.put(WebsocketConst.MSG_ID, sysMessage.getId());
+			obj.put(WebsocketConst.MSG_TXT, sysMessage.getEsContent());
+			obj.put("senderId", sysMessage.getEsSenderId());
+			obj.put("senderName", sysMessage.getEsSenderName());
+			obj.put("time", sysMessage.getEsSendTime());
+			webSocket.sendMessage(sysMessage.getEsReceiverId(), obj.toJSONString());
+			return Result.ok("消息发送成功");
+		} catch (Exception e) {
+			log.error("发送聊天消息失败", e);
+			return Result.error("消息发送失败: " + e.getMessage());
+		}
 	}
 
 }

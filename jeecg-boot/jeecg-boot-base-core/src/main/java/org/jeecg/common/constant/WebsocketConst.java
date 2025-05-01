@@ -47,6 +47,11 @@ public class WebsocketConst {
      * 消息类型 topic 系统通知
      */
     public static final String CMD_TOPIC = "topic";
+    
+    /**
+     * 消息类型 chat 聊天消息
+     */
+    public static final String CMD_CHAT = "chat";
 
     /**
      * 消息类型 email

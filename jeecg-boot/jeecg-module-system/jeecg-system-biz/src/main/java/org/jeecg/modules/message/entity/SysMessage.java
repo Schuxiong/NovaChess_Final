@@ -59,4 +59,21 @@ public class SysMessage extends JeecgEntity {
 	/**备注*/
 	@Excel(name = "备注", width = 15)
 	private java.lang.String remark;
+	
+	/**发送者ID*/
+	@Excel(name = "发送者ID", width = 15)
+	private java.lang.String esSenderId;
+	/**发送者名称*/
+	@Excel(name = "发送者名称", width = 15)
+	private java.lang.String esSenderName;
+	/**接收者ID*/
+	@Excel(name = "接收者ID", width = 15)
+	private java.lang.String esReceiverId;
+	/**接收者名称*/
+	@Excel(name = "接收者名称", width = 15)
+	private java.lang.String esReceiverName;
+	/**消息类型 0:系统消息 1:聊天消息*/
+	@Excel(name = "消息类型", width = 15)
+	@Dict(dicCode = "messageCategory")
+	private java.lang.String esCategory;
 }

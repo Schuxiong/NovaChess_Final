@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.constant.WebsocketConst;
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.system.util.JwtUtil;
@@ -53,6 +54,9 @@ public class SysMessageController extends JeecgController<SysMessage, ISysMessag
 	
 	@Autowired
 	private WebSocket webSocket;
+	
+	@Autowired
+	private ISysBaseAPI sysBaseApi;
 
 	/**
 	 * 分页列表查询
@@ -166,6 +170,27 @@ public class SysMessageController extends JeecgController<SysMessage, ISysMessag
 	 * @param pageSize 每页记录数
 	 * @return
 	 */
+	@Operation(summary = "获取聊天会话列表")
+	@GetMapping("/getChatSessions")
+	public Result<?> getChatSessions(
+			@RequestParam(name = "userId", required = true) String userId,
+			@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize) {
+		QueryWrapper<SysMessage> queryWrapper = new QueryWrapper<>();
+		// 查询当前用户参与的所有聊天会话
+		queryWrapper.and(wrapper -> wrapper
+				.eq("es_sender_id", userId)
+				.or()
+				.eq("es_receiver_id", userId));
+		// 消息类型为聊天消息
+		queryWrapper.eq("es_category", "1");
+		// 按时间排序
+		queryWrapper.orderByDesc("es_send_time");
+		Page<SysMessage> page = new Page<>(pageNo, pageSize);
+		IPage<SysMessage> pageList = sysMessageService.page(page, queryWrapper);
+		return Result.ok(pageList);
+	}
+	
 	@Operation(summary = "获取聊天记录")
 	@GetMapping("/getChatHistory")
 	public Result<?> getChatHistory(
@@ -207,9 +232,20 @@ public class SysMessageController extends JeecgController<SysMessage, ISysMessag
 			if (sysUser == null) {
 				return Result.error("用户未登录");
 			}
+			// 根据username查询接收者ID
+			if (sysMessage.getEsReceiverName() != null) {
+				String username = sysMessage.getEsReceiverName();
+				LoginUser receiver = sysBaseApi.getUserByName(username);
+				if (receiver == null) {
+					return Result.error("接收用户不存在");
+				}
+				sysMessage.setEsReceiverId(receiver.getId());
+			} else {
+				return Result.error("必须指定接收者用户名");
+			}
 			// 设置发送者信息
-			sysMessage.setEsSenderId(sysUser.getId());
-			sysMessage.setEsSenderName(sysUser.getRealname());
+			sysMessage.setEsSenderId(sysMessage.getEsSenderId() != null ? sysMessage.getEsSenderId() : sysUser.getId());
+			sysMessage.setEsSenderName(sysMessage.getEsSenderName() != null ? sysMessage.getEsSenderName() : sysUser.getRealname());
 			// 设置消息类型为聊天消息
 			sysMessage.setEsCategory("1");
 			// 设置消息状态为已发送

@@ -66,6 +66,51 @@ import java.util.stream.Collectors;
 @RequestMapping("/sys/user")
 public class SysUserController {
 
+	/**
+	 * 移动端用户信息编辑接口
+	 * @param jsonObject 包含用户信息的JSON对象
+	 * @return
+	 */
+	@RequestMapping(value = "/appUserEdit", method = RequestMethod.POST)
+	public Result<SysUser> appUserEdit(@RequestBody JSONObject jsonObject) {
+		Result<SysUser> result = new Result<SysUser>();
+		try {
+			SysUser sysUser = sysUserService.getById(jsonObject.getString("id"));
+			if(sysUser==null) {
+				result.error500("未找到对应用户");
+				return result;
+			}
+			
+			// 更新用户基本信息
+			if(jsonObject.containsKey("username")) {
+				sysUser.setUsername(jsonObject.getString("username"));
+			}
+			if(jsonObject.containsKey("phone")) {
+				sysUser.setPhone(jsonObject.getString("phone"));
+			}
+			if(jsonObject.containsKey("email")) {
+				sysUser.setEmail(jsonObject.getString("email"));
+			}
+			if(jsonObject.containsKey("realname")) {
+				sysUser.setRealname(jsonObject.getString("realname"));
+			}
+			if(jsonObject.containsKey("birthday")) {
+				sysUser.setBirthday(jsonObject.getDate("birthday"));
+			}
+			if(jsonObject.containsKey("sex")) {
+				sysUser.setSex(jsonObject.getInteger("sex"));
+			}
+			
+			sysUser.setUpdateTime(new Date());
+			sysUserService.updateById(sysUser);
+			result.success("修改成功!");
+		} catch (Exception e) {
+			log.error(e.getMessage(), e);
+			result.error500("操作失败");
+		}
+		return result;
+	}
+
 	@Autowired
 	private ISysUserService sysUserService;
 

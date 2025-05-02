@@ -188,6 +188,20 @@ public class SysMessageController extends JeecgController<SysMessage, ISysMessag
 		queryWrapper.orderByDesc("es_send_time");
 		Page<SysMessage> page = new Page<>(pageNo, pageSize);
 		IPage<SysMessage> pageList = sysMessageService.page(page, queryWrapper);
+		
+		// 添加头像信息
+		pageList.getRecords().forEach(message -> {
+			String senderId = message.getEsSenderId();
+			String receiverId = message.getEsReceiverId();
+			LoginUser sender = sysBaseApi.getUserById(senderId);
+			LoginUser receiver = sysBaseApi.getUserById(receiverId);
+			if(sender != null) {
+				message.setEsSenderAvatar(sender.getAvatar());
+			}
+			if(receiver != null) {
+				message.setEsReceiverAvatar(receiver.getAvatar());
+			}
+		});
 		return Result.ok(pageList);
 	}
 	
@@ -210,6 +224,16 @@ public class SysMessageController extends JeecgController<SysMessage, ISysMessag
 		queryWrapper.orderByDesc("es_send_time");
 		Page<SysMessage> page = new Page<>(pageNo, pageSize);
 		IPage<SysMessage> pageList = sysMessageService.page(page, queryWrapper);
+		
+		// 添加头像信息
+		LoginUser sender = sysBaseApi.getUserById(senderId);
+		LoginUser receiver = sysBaseApi.getUserById(receiverId);
+		String senderAvatar = sender != null ? sender.getAvatar() : null;
+		String receiverAvatar = receiver != null ? receiver.getAvatar() : null;
+		pageList.getRecords().forEach(message -> {
+			message.setEsSenderAvatar(senderAvatar);
+			message.setEsReceiverAvatar(receiverAvatar);
+		});
 		return Result.ok(pageList);
 	}
 	

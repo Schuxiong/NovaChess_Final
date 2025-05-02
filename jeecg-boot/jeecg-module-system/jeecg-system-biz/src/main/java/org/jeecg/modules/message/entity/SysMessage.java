@@ -23,6 +23,15 @@ import lombok.experimental.Accessors;
 @Accessors(chain = true)
 @TableName("sys_message")
 public class SysMessage extends JeecgEntity {
+	/**发送者头像*/
+	@Excel(name = "发送者头像", width = 15)
+	@com.baomidou.mybatisplus.annotation.TableField("es_sender_avatar")
+	private java.lang.String esSenderAvatar;
+	
+	/**接收者头像*/
+	@Excel(name = "接收者头像", width = 15)
+	@com.baomidou.mybatisplus.annotation.TableField("es_receiver_avatar")
+	private java.lang.String esReceiverAvatar;
 	/**推送内容*/
 	@Excel(name = "推送内容", width = 15)
 	@com.baomidou.mybatisplus.annotation.TableField("es_content")

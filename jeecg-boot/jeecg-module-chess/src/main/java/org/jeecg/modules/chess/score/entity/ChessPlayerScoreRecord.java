@@ -1,4 +1,4 @@
-package org.jeecg.modules.chess.pair.entity;
+package org.jeecg.modules.chess.score.entity;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -16,46 +16,34 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.jeecgframework.poi.excel.annotation.Excel;
 
 /**
- * @Description: 对弈关系
+ * @Description: 游戏选手得分记录
  * @Author: jeecg-boot
- * @Date:   2025-04-25
+ * @Date:   2025-05-02
  * @Version: V1.0
  */
 @Data
-@TableName("chess_friend_pair")
+@TableName("chess_player_score_record")
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@Schema(description="对弈关系")
-public class ChessFriendPair {
+@Schema(description="游戏选手得分记录")
+public class ChessPlayerScoreRecord {
     
 	/**id*/
 	@TableId(type = IdType.ASSIGN_ID)
     @Schema(description = "id")
 	private java.lang.String id;
-	/**发起用户id*/
-	@Excel(name = "发起用户id", width = 15)
-    @Schema(description = "发起用户id")
-	private java.lang.String sourceUserId;
-	/**发起用户账号*/
-	@Excel(name = "发起用户账号", width = 15)
-    @Schema(description = "发起用户账号")
-	private java.lang.String sourceUserAccount;
-	/**1：黑色；2: 白色*/
-	@Excel(name = "1：黑色；2: 白色", width = 15)
-    @Schema(description = "1：黑色；2: 白色")
-	private java.lang.Integer sourceOnePart;
-	/**接受用户id*/
-	@Excel(name = "接受用户id", width = 15)
-    @Schema(description = "接受用户id")
-	private java.lang.String acceptUserId;
-	/**接受用户账号*/
-	@Excel(name = "接受用户账号", width = 15)
-    @Schema(description = "接受用户账号")
-	private java.lang.String acceptUserAccount;
-	/**1：黑色；2: 白色*/
-	@Excel(name = "1：黑色；2: 白色", width = 15)
-    @Schema(description = "1：黑色；2: 白色")
-	private java.lang.Integer acceptOnePart;
+	/**游戏选手id*/
+	@Excel(name = "游戏选手id", width = 15)
+    @Schema(description = "游戏选手id")
+	private java.lang.String chessPlayerId;
+	/**游戏id*/
+	@Excel(name = "游戏id", width = 15)
+    @Schema(description = "游戏id")
+	private java.lang.String chessGameId;
+	/**得分，>0为获取，<0为失去*/
+	@Excel(name = "得分，>0为获取，<0为失去", width = 15)
+    @Schema(description = "得分，>0为获取，<0为失去")
+	private java.lang.Integer score;
 	/**创建人*/
 	@Excel(name = "创建人", width = 15)
     @Schema(description = "创建人")
@@ -84,9 +72,4 @@ public class ChessFriendPair {
 	@Excel(name = "删除状态", width = 15)
     @Schema(description = "删除状态")
 	private java.lang.Integer delFlag;
-	
-	/**邀请状态：0-待接受，1-已接受，2-已拒绝*/
-	@Excel(name = "邀请状态", width = 15)
-    @Schema(description = "邀请状态：0-待接受，1-已接受，2-已拒绝")
-	private java.lang.Integer inviteStatus;
 }

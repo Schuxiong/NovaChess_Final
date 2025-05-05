@@ -35,6 +35,9 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
+import org.jeecg.modules.system.entity.SysUser;
+import org.jeecg.modules.system.service.ISysUserService;
+
  /**
  * @Description: 对弈关系
  * @Author: jeecg-boot
@@ -81,6 +84,29 @@ public class ChessFriendPairController extends JeecgController<ChessFriendPair, 
 	@Operation(summary = "对弈关系-添加")
 	@PostMapping(value = "/add")
 	public Result<?> add(@RequestBody ChessFriendPair chessFriendPair) {
+		// 检查是否已存在相同用户的待处理邀请
+		QueryWrapper<ChessFriendPair> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("source_user_id", chessFriendPair.getSourceUserId());
+		queryWrapper.eq("accept_user_id", chessFriendPair.getAcceptUserId());
+		queryWrapper.eq("invite_status", 0);
+		List<ChessFriendPair> existingList = chessFriendPairService.list(queryWrapper);
+		
+		if (!existingList.isEmpty()) {
+			if(existingList.size() > 1) {
+				// 清理重复数据
+				for(int i=1; i<existingList.size(); i++) {
+					chessFriendPairService.removeById(existingList.get(i).getId());
+				}
+			}
+			// 更新现有邀请
+			ChessFriendPair existing = existingList.get(0);
+			chessFriendPair.setId(existing.getId());
+			chessFriendPairService.updateById(chessFriendPair);
+			return Result.OK("邀请已更新！");
+		}
+		
+		// 设置邀请状态为待接受(0)
+		chessFriendPair.setInviteStatus(0);
 		chessFriendPairService.save(chessFriendPair);
 		return Result.OK("添加成功！");
 	}
@@ -166,5 +192,149 @@ public class ChessFriendPairController extends JeecgController<ChessFriendPair, 
   public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
       return super.importExcel(request, response, ChessFriendPair.class);
   }
+  
+  /**
+   * 清除用户所有待处理的邀请
+   * @param userId 用户ID
+   * @return
+   */
+  @AutoLog(value = "对弈关系-清除待处理邀请")
+  @Operation(summary = "对弈关系-清除待处理邀请")
+  @PostMapping(value = "/clearPendingInvitations")
+  public Result<?> clearPendingInvitations(@RequestBody Map<String, String> params) {
+      String userId = params.get("userId");
+      QueryWrapper<ChessFriendPair> queryWrapper = new QueryWrapper<>();
+      queryWrapper.eq("accept_user_id", userId);
+      queryWrapper.eq("invite_status", 0);
+      chessFriendPairService.remove(queryWrapper);
+      return Result.OK("清除成功！");
+  }
+  
+  /**
+   * 查询待接受的邀请
+   *
+   * @param userId 当前用户ID
+   * @return
+   */
+  @Autowired
+  private ISysUserService sysUserService;
+  @AutoLog(value = "对弈关系-查询待接受的邀请")
+  @Operation(summary = "对弈关系-查询待接受的邀请")
+  @GetMapping(value = "/queryPendingInvitations")
+  public Result<?> queryPendingInvitations(@RequestParam(name="userId",required=true) String userId) {
+      QueryWrapper<ChessFriendPair> queryWrapper = new QueryWrapper<>();
+      queryWrapper.eq("accept_user_id", userId);
+      queryWrapper.eq("invite_status", 0); // 0-待接受
+      List<ChessFriendPair> pendingInvitations = chessFriendPairService.list(queryWrapper);
+      return Result.OK(pendingInvitations);
+  }
+  
+  /**
+   * 接受或拒绝邀请
+   *
+   * @param id 邀请ID
+   * @param status 1-接受，2-拒绝
+   * @return
+   */
+  @AutoLog(value = "对弈关系-接受或拒绝邀请")
+  @Operation(summary = "对弈关系-接受或拒绝邀请")
+  @PostMapping(value = "/respondInvitation")
+  public Result<?> respondInvitation(
+      @RequestParam(name="id",required=true) String id,
+      @RequestParam(name="status",required=true) Integer status) {
+      
+      if (status != 1 && status != 2) {
+          return Result.error("状态值无效，只能为1(接受)或2(拒绝)");
+      }
+      
+      ChessFriendPair chessFriendPair = chessFriendPairService.getById(id);
+      if (chessFriendPair == null) {
+          return Result.error("邀请不存在");
+      }
+      
+      if (chessFriendPair.getInviteStatus() != 0) {
+          return Result.error("该邀请已被处理");
+      }
+      
+      chessFriendPair.setInviteStatus(status);
+      chessFriendPairService.updateById(chessFriendPair);
+      
+      String message = status == 1 ? "邀请已接受" : "邀请已拒绝";
+      return Result.OK(message);
+  }
 
+    /**
+     * 查询邀请状态
+     * @param id 邀请ID
+     * @return
+     */
+    @AutoLog(value = "对弈关系-查询邀请状态")
+    @Operation(summary = "对弈关系-查询邀请状态")
+    @GetMapping(value = "/getInvitationStatus")
+    public Result<?> getInvitationStatus(
+            @RequestParam(name="sourceUserId", required=true) String sourceUserId,
+            @RequestParam(name="acceptUserId", required=true) String acceptUserId) {
+        if (sourceUserId == null || sourceUserId.trim().isEmpty() || 
+            acceptUserId == null || acceptUserId.trim().isEmpty()) {
+            return Result.error("用户ID不能为空");
+        }
+        
+        // 查询这对用户之间最新的邀请记录
+        QueryWrapper<ChessFriendPair> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("source_user_id", sourceUserId);
+        queryWrapper.eq("accept_user_id", acceptUserId);
+        queryWrapper.orderByDesc("create_time");
+        queryWrapper.last("LIMIT 1");
+        
+        ChessFriendPair pair = chessFriendPairService.getOne(queryWrapper);
+        if (pair == null) {
+            return Result.error("未找到邀请信息");
+        }
+        
+        SysUser sourceUser = sysUserService.getById(pair.getSourceUserId());
+        SysUser acceptUser = sysUserService.getById(pair.getAcceptUserId());
+        Map<String, Object> sourceUserInfo = sourceUser == null ? null : Map.of(
+                "id", sourceUser.getId(),
+                "username", sourceUser.getUsername(),
+                "realname", sourceUser.getRealname()
+        );
+        Map<String, Object> acceptUserInfo = acceptUser == null ? null : Map.of(
+                "id", acceptUser.getId(),
+                "username", acceptUser.getUsername(),
+                "realname", acceptUser.getRealname()
+        );
+        Map<String, Object> result = Map.of(
+                "id", pair.getId(),
+                "status", pair.getInviteStatus(),
+                "sourceUserInfo", sourceUserInfo,
+                "acceptUserInfo", acceptUserInfo
+        );
+        return Result.OK(result);
+    }
+
+    /**
+     * 取消邀请
+     * @param param 请求参数 {"id": "邀请ID"}
+     * @return
+     */
+    @AutoLog(value = "对弈关系-取消邀请")
+    @Operation(summary = "对弈关系-取消邀请")
+    @PostMapping(value = "/cancelInvitation")
+    public Result<?> cancelInvitation(@RequestBody Map<String, String> param) {
+        String id = param.get("id");
+        if (id == null || id.trim().isEmpty()) {
+            return Result.error("邀请ID不能为空");
+        }
+        ChessFriendPair pair = chessFriendPairService.getById(id);
+        if (pair == null) {
+            return Result.error("未找到邀请信息，请检查ID是否正确");
+        }
+        // 只有待处理状态才能取消
+        if (pair.getInviteStatus() != 0) {
+            return Result.error("当前邀请不可取消");
+        }
+        pair.setInviteStatus(2); // 2-已拒绝/取消
+        chessFriendPairService.updateById(pair);
+        return Result.OK("邀请已取消");
+    }
 }

@@ -24,8 +24,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.system.base.controller.JeecgController;
+import org.jeecg.modules.chess.game.vo.ChessGameBatchVO;
 import org.jeecg.modules.chess.game.vo.ChessGameVO;
 import org.jeecg.modules.chess.game.vo.PlayerPairVO;
+import org.jeecg.modules.chess.score.entity.ChessPlayerScore;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -78,6 +80,25 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 		 }
 		 ChessGameVO objChessGameVO = chessGameService.init(objSourcePlayerPairVO,targetPlayerPairVO);
 		 return Result.OK("成功",objChessGameVO);
+	 }
+
+
+	 /**
+	  * 游戏进入
+	  *
+	  *
+	  * @return
+	  */
+	 @AutoLog(value = "当前登录用户进入游戏")
+	 @Operation(summary = "当前登录用户进入游戏")
+	 @PostMapping(value = "/enter")
+	 public Result<?> gameEnter(){
+		 //获取当前登录用户
+		 LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+
+		 List<ChessGameBatchVO> lstResult = chessGameService.enter(sysUser.getId());
+
+		 return Result.OK("成功",lstResult);
 	 }
 
 	/**

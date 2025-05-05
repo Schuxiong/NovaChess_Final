@@ -30,31 +30,29 @@ public class FriendController {
 
     @Operation(summary = "获取所有可选队友数据列表")
     @PostMapping(value = "/chooselist")
-    //@PermissionData(pageComponent = "jeecg/JeecgDemoList")
-    public Result<?> chooseList( @RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo, @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+    public Result<?> chooseList(@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo, @RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
                                 HttpServletRequest req) {
         log.info("进入chooseList");
-        LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();//获取登录用户信息
-
+        LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
         List<PairUserVO> lstPariUserVO = new LinkedList<>();
-        Page<SysUser> page = new Page<>();
-        String strDeptId = "1234";
-        IPage<SysUser> lstUser = sysUserService.getUserByDepId(page,strDeptId,null);
-        String strCurrentUserId = sysUser.getId();
-        if( lstUser == null || lstUser.getTotal() < 1L)
-                return Result.ok();
-
-        for (SysUser temp : lstUser.getRecords()){
-             if(strCurrentUserId.equals(temp.getId())){
-                 lstUser.getRecords().remove(temp);
-                 break;
-             }else{
-                 PairUserVO objPairUserVO = new PairUserVO();
-                 objPairUserVO.setId(temp.getId());
-                 objPairUserVO.setUserName(temp.getUsername());
-             }
+        String depart_ids = req.getParameter("depart_ids");
+        if(depart_ids == null || depart_ids.isEmpty()) {
+            return Result.error("部门ID不能为空");
         }
-
+        // 直接查询sys_user表，depart_ids相同且排除当前用户
+        List<SysUser> userList = sysUserService.lambdaQuery()
+                .eq(SysUser::getDepartIds, depart_ids)
+                .ne(SysUser::getId, sysUser.getId())
+                .list();
+        if(userList == null || userList.isEmpty()) {
+            return Result.ok();
+        }
+        for (SysUser temp : userList) {
+            PairUserVO objPairUserVO = new PairUserVO();
+            objPairUserVO.setId(temp.getId());
+            objPairUserVO.setUserName(temp.getUsername());
+            lstPariUserVO.add(objPairUserVO);
+        }
         return Result.OK(lstPariUserVO);
     }
 }

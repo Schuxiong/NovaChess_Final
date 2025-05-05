@@ -3,6 +3,7 @@ package org.jeecg.modules.chess.game.service;
 import org.jeecg.modules.chess.game.entity.ChessGame;
 import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.modules.chess.game.entity.ChessPieces;
+import org.jeecg.modules.chess.game.vo.ChessGameBatchVO;
 import org.jeecg.modules.chess.game.vo.ChessGameVO;
 import org.jeecg.modules.chess.game.vo.PlayerPairVO;
 
@@ -21,4 +22,7 @@ public interface IChessGameService extends IService<ChessGame> {
      * @param playerPairVO
      */
     public ChessGameVO init(PlayerPairVO sourcePlayerPariVO, PlayerPairVO targetPlayerPairVO);
+
+
+    public List<ChessGameBatchVO> enter(String userId);
 }

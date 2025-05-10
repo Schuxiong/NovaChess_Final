@@ -19,6 +19,9 @@ import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.chess.game.entity.ChessGame;
 import org.jeecg.modules.chess.game.entity.ChessPieces;
 import org.jeecg.modules.chess.game.service.IChessGameService;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
+import java.util.Map;
+import java.util.HashMap;
 import java.util.Date;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
@@ -55,6 +58,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/game/chessGame")
 public class ChessGameController extends JeecgController<ChessGame, IChessGameService> {
+
+	@Autowired
+	private SimpMessagingTemplate messagingTemplate;
 	@Autowired
 	private IChessGameService chessGameService;
 
@@ -177,9 +183,48 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 			return Result.error("未能找到您可以进入的游戏。");
 		}
 
-		// log.info("用户 [账号:" + sysUser.getUsername() + ", ID:" + sysUser.getId() + "]
-		// 成功进入游戏，找到 " + lstResult.size() + " 个可进入的游戏局.");
+		// log.info("用户 [账号:" + sysUser.getUsername() + ", ID:" + sysUser.getId() + "] 成功进入游戏，找到 " + lstResult.size() + " 个可进入的游戏局.");
+
+		// 发送WebSocket通知
+		for (ChessGameBatchVO gameVO : lstResult) {
+			String gameId = gameVO.getGameId();
+			if (gameId != null && !gameId.isEmpty()) {
+				Map<String, Object> messagePayload = new HashMap<>();
+				messagePayload.put("type", "PLAYER_JOINED");
+				Map<String, String> payloadData = new HashMap<>();
+				payloadData.put("userId", sysUser.getId());
+				payloadData.put("username", sysUser.getUsername());
+                payloadData.put("gameId", gameId);
+				messagePayload.put("payload", payloadData);
+				String destination = "/topic/game/" + gameId;
+				messagingTemplate.convertAndSend(destination, messagePayload);
+				log.info("Sent PLAYER_JOINED notification to {} for game {} and user {}", destination, gameId, sysUser.getUsername());
+			}
+		}
+
 		return Result.OK("成功", lstResult);
+	}
+
+	/**
+	 * 通过sourceInviteId获取gameId
+	 *
+	 * @param sourceInviteId
+	 * @return
+	 */
+	@AutoLog(value = "通过sourceInviteId获取gameId")
+	@Operation(summary = "通过sourceInviteId获取gameId")
+	@GetMapping(value = "/getGameIdByInviteId")
+	public Result<?> getGameIdByInviteId(@RequestParam String sourceInviteId) {
+		QueryWrapper<ChessGame> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("source_invite_id", sourceInviteId);
+		// 移除game_state和del_flag的严格限制，只根据source_invite_id查询
+		List<ChessGame> games = chessGameService.list(queryWrapper);
+
+		if (games == null || games.isEmpty()) {
+			return Result.error("未找到对应的游戏");
+		}
+
+		return Result.OK(games.get(0).getId());
 	}
 
 	/**

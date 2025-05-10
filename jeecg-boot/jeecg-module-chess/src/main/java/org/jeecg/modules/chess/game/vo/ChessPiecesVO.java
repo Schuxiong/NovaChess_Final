@@ -10,7 +10,6 @@ public class ChessPiecesVO implements Serializable {
 
     private String chessGameId;
 
-
     private String chessPiecesId;
 
     private String positionX;
@@ -19,5 +18,12 @@ public class ChessPiecesVO implements Serializable {
 
     private String targetChessPiecesId;
 
+    /** 当前轮到哪方下棋，1:黑方，2:白方 **/
+    private Integer currentTurn;
 
+    /** 错误信息 **/
+    private String errorMessage;
+
+    /** 当前游戏状态 **/
+    private ChessGameVO currentGameState;
 }

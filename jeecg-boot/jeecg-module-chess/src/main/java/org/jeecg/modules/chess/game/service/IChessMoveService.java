@@ -2,6 +2,8 @@ package org.jeecg.modules.chess.game.service;
 
 import org.jeecg.modules.chess.game.entity.ChessMove;
 import com.baomidou.mybatisplus.extension.service.IService;
+import org.jeecg.modules.chess.game.vo.ChatChessMoveRequestVO;
+import org.jeecg.modules.chess.game.vo.ChessMoveResponseVO;
 import org.jeecg.modules.chess.game.vo.ChessPiecesVO;
 
 /**
@@ -14,4 +16,7 @@ public interface IChessMoveService extends IService<ChessMove> {
 
 
     public ChessPiecesVO movePieces(ChessMove chessMove);
+
+
+    public ChessMoveResponseVO chessMovePieces(ChatChessMoveRequestVO chatChessMoveRequestVO);
 }

@@ -1,0 +1,58 @@
+<html>
+<head>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sockjs-client/1.1.4/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <title>Test Socket</title>
+</head>
+<body>
+    <button onclick="onConnected()">Connect</button>
+
+    <script>
+'use strict';
+        var socket = new SockJS('/ws');
+
+
+    
+
+        var stompClient = Stomp.over(socket);
+
+        stompClient.connect({}, onConnected, onError);
+
+        
+       
+
+
+        function onConnected() {
+            // Subscribe to the Public Topic
+            stompClient.subscribe('/topic/chessboard', onMessageBoardReceived);
+            stompClient.subscribe('/topic/movepieces', onMessageMoveReceived);
+            // Tell your username to the server
+            stompClient.send("/app/chessboard",
+                {},
+                JSON.stringify({userId: 'username', type: 'JOIN'})
+            )
+
+
+            stompClient.send("/app/movepieces",
+                {},
+                JSON.stringify({userId: 'sfsf', type: 'JOIN'})
+            )
+
+           
+        }   
+
+        function onMessageBoardReceived(payload) {
+             alert(payload);
+
+        }
+
+        function onMessageMoveReceived(payload) {
+            console.log(payload);
+        }
+
+        function onError(error) {
+            console.log(error);
+        }
+    </script>
+</body>
+</html>

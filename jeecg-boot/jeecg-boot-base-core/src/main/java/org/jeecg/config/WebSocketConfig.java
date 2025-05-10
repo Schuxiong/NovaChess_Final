@@ -13,8 +13,8 @@ import org.springframework.web.socket.server.standard.ServerEndpointExporter;
 @Configuration
 public class WebSocketConfig {
     /**
-     * 	注入ServerEndpointExporter，
-     * 	这个bean会自动注册使用了@ServerEndpoint注解声明的Websocket endpoint
+     * 注入ServerEndpointExporter，
+     * 这个bean会自动注册使用了@ServerEndpoint注解声明的Websocket endpoint
      */
     @Bean
     public ServerEndpointExporter serverEndpointExporter() {
@@ -22,16 +22,17 @@ public class WebSocketConfig {
     }
 
     @Bean
-    public WebsocketFilter websocketFilter(){
+    public WebsocketFilter websocketFilter() {
         return new WebsocketFilter();
     }
 
     @Bean
-    public FilterRegistrationBean getFilterRegistrationBean(){
+    public FilterRegistrationBean getFilterRegistrationBean() {
         FilterRegistrationBean bean = new FilterRegistrationBean();
         bean.setFilter(websocketFilter());
-        //TODO 临时注释掉，测试下线上socket总断的问题
-        bean.addUrlPatterns("/taskCountSocket/*", "/websocket/*","/eoaSocket/*","/eoaNewChatSocket/*", "/newsWebsocket/*", "/dragChannelSocket/*", "/vxeSocket/*");
+        // TODO 临时注释掉，测试下线上socket总断的问题
+        bean.addUrlPatterns("/taskCountSocket/*", "/websocket/*", "/eoaSocket/*", "/eoaNewChatSocket/*",
+                "/newsWebsocket/*", "/dragChannelSocket/*", "/vxeSocket/*");
         return bean;
     }
 

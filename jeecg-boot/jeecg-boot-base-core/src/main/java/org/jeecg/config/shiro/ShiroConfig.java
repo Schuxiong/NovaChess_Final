@@ -56,7 +56,7 @@ public class ShiroConfig {
     private JeecgBaseConfig jeecgBaseConfig;
     @Autowired(required = false)
     private RedisProperties redisProperties;
-    
+
     /**
      * Filter Chain定义说明
      *
@@ -71,47 +71,47 @@ public class ShiroConfig {
         // 拦截器
         Map<String, String> filterChainDefinitionMap = new LinkedHashMap<String, String>();
 
-        //支持yml方式，配置拦截排除
-        if(jeecgBaseConfig!=null && jeecgBaseConfig.getShiro()!=null){
+        // 支持yml方式，配置拦截排除
+        if (jeecgBaseConfig != null && jeecgBaseConfig.getShiro() != null) {
             String shiroExcludeUrls = jeecgBaseConfig.getShiro().getExcludeUrls();
-            if(oConvertUtils.isNotEmpty(shiroExcludeUrls)){
+            if (oConvertUtils.isNotEmpty(shiroExcludeUrls)) {
                 String[] permissionUrl = shiroExcludeUrls.split(",");
-                for(String url : permissionUrl){
-                    filterChainDefinitionMap.put(url,"anon");
+                for (String url : permissionUrl) {
+                    filterChainDefinitionMap.put(url, "anon");
                 }
             }
         }
 
         // 配置不会被拦截的链接 顺序判断
-        filterChainDefinitionMap.put("/sys/cas/client/validateLogin", "anon"); //cas验证登录
-        filterChainDefinitionMap.put("/sys/randomImage/**", "anon"); //登录验证码接口排除
-        filterChainDefinitionMap.put("/sys/checkCaptcha", "anon"); //登录验证码接口排除
-        filterChainDefinitionMap.put("/sys/smsCheckCaptcha", "anon"); //短信次数发送太多验证码排除
-        filterChainDefinitionMap.put("/sys/login", "anon"); //登录接口排除
-        filterChainDefinitionMap.put("/sys/mLogin", "anon"); //登录接口排除
-        filterChainDefinitionMap.put("/sys/logout", "anon"); //登出接口排除
-        filterChainDefinitionMap.put("/sys/thirdLogin/**", "anon"); //第三方登录
-        filterChainDefinitionMap.put("/sys/getEncryptedString", "anon"); //获取加密串
-        filterChainDefinitionMap.put("/sys/sms", "anon");//短信验证码
-        filterChainDefinitionMap.put("/sys/phoneLogin", "anon");//手机登录
-        filterChainDefinitionMap.put("/sys/user/checkOnlyUser", "anon");//校验用户是否存在
-        filterChainDefinitionMap.put("/sys/user/register", "anon");//用户注册
-        filterChainDefinitionMap.put("/sys/user/phoneVerification", "anon");//用户忘记密码验证手机号
-        filterChainDefinitionMap.put("/sys/user/passwordChange", "anon");//用户更改密码
-        filterChainDefinitionMap.put("/auth/2step-code", "anon");//登录验证码
-        filterChainDefinitionMap.put("/sys/common/static/**", "anon");//图片预览 &下载文件不限制token
-        filterChainDefinitionMap.put("/sys/common/pdf/**", "anon");//pdf预览
+        filterChainDefinitionMap.put("/sys/cas/client/validateLogin", "anon"); // cas验证登录
+        filterChainDefinitionMap.put("/sys/randomImage/**", "anon"); // 登录验证码接口排除
+        filterChainDefinitionMap.put("/sys/checkCaptcha", "anon"); // 登录验证码接口排除
+        filterChainDefinitionMap.put("/sys/smsCheckCaptcha", "anon"); // 短信次数发送太多验证码排除
+        filterChainDefinitionMap.put("/sys/login", "anon"); // 登录接口排除
+        filterChainDefinitionMap.put("/sys/mLogin", "anon"); // 登录接口排除
+        filterChainDefinitionMap.put("/sys/logout", "anon"); // 登出接口排除
+        filterChainDefinitionMap.put("/sys/thirdLogin/**", "anon"); // 第三方登录
+        filterChainDefinitionMap.put("/sys/getEncryptedString", "anon"); // 获取加密串
+        filterChainDefinitionMap.put("/sys/sms", "anon");// 短信验证码
+        filterChainDefinitionMap.put("/sys/phoneLogin", "anon");// 手机登录
+        filterChainDefinitionMap.put("/sys/user/checkOnlyUser", "anon");// 校验用户是否存在
+        filterChainDefinitionMap.put("/sys/user/register", "anon");// 用户注册
+        filterChainDefinitionMap.put("/sys/user/phoneVerification", "anon");// 用户忘记密码验证手机号
+        filterChainDefinitionMap.put("/sys/user/passwordChange", "anon");// 用户更改密码
+        filterChainDefinitionMap.put("/auth/2step-code", "anon");// 登录验证码
+        filterChainDefinitionMap.put("/sys/common/static/**", "anon");// 图片预览 &下载文件不限制token
+        filterChainDefinitionMap.put("/sys/common/pdf/**", "anon");// pdf预览
 
-        //filterChainDefinitionMap.put("/sys/common/view/**", "anon");//图片预览不限制token
-        //filterChainDefinitionMap.put("/sys/common/download/**", "anon");//文件下载不限制token
-        filterChainDefinitionMap.put("/generic/**", "anon");//pdf预览需要文件
+        // filterChainDefinitionMap.put("/sys/common/view/**", "anon");//图片预览不限制token
+        // filterChainDefinitionMap.put("/sys/common/download/**",
+        // "anon");//文件下载不限制token
+        filterChainDefinitionMap.put("/generic/**", "anon");// pdf预览需要文件
 
-        filterChainDefinitionMap.put("/sys/getLoginQrcode/**", "anon"); //登录二维码
-        filterChainDefinitionMap.put("/sys/getQrcodeToken/**", "anon"); //监听扫码
-        filterChainDefinitionMap.put("/sys/checkAuth", "anon"); //授权接口排除
+        filterChainDefinitionMap.put("/sys/getLoginQrcode/**", "anon"); // 登录二维码
+        filterChainDefinitionMap.put("/sys/getQrcodeToken/**", "anon"); // 监听扫码
+        filterChainDefinitionMap.put("/sys/checkAuth", "anon"); // 授权接口排除
 
-
-        //update-begin--Author:scott Date:20221116 for：排除静态资源后缀
+        // update-begin--Author:scott Date:20221116 for：排除静态资源后缀
         filterChainDefinitionMap.put("/", "anon");
         filterChainDefinitionMap.put("/doc.html", "anon");
         filterChainDefinitionMap.put("/**/*.js", "anon");
@@ -128,7 +128,7 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/**/*.woff2", "anon");
         filterChainDefinitionMap.put("/**/*.glb", "anon");
         filterChainDefinitionMap.put("/**/*.wasm", "anon");
-        //update-end--Author:scott Date:20221116 for：排除静态资源后缀
+        // update-end--Author:scott Date:20221116 for：排除静态资源后缀
 
         filterChainDefinitionMap.put("/druid/**", "anon");
         filterChainDefinitionMap.put("/swagger-ui.html", "anon");
@@ -140,12 +140,12 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/sys/annountCement/show/**", "anon");
         // update-end--Author:sunjianlei Date:20210510 for：排除消息通告查看详情页面（用于第三方APP）
 
-        //积木报表排除
+        // 积木报表排除
         filterChainDefinitionMap.put("/jmreport/**", "anon");
         filterChainDefinitionMap.put("/**/*.js.map", "anon");
         filterChainDefinitionMap.put("/**/*.css.map", "anon");
-        
-        //积木BI大屏和仪表盘排除
+
+        // 积木BI大屏和仪表盘排除
         filterChainDefinitionMap.put("/drag/view", "anon");
         filterChainDefinitionMap.put("/drag/page/queryById", "anon");
         filterChainDefinitionMap.put("/drag/page/addVisitsNumber", "anon");
@@ -157,25 +157,30 @@ public class ShiroConfig {
         filterChainDefinitionMap.put("/jimubi/view", "anon");
         filterChainDefinitionMap.put("/jimubi/share/view/**", "anon");
 
-        //大屏模板例子
+        // 大屏模板例子
         filterChainDefinitionMap.put("/test/bigScreen/**", "anon");
         filterChainDefinitionMap.put("/bigscreen/template1/**", "anon");
         filterChainDefinitionMap.put("/bigscreen/template2/**", "anon");
-        //filterChainDefinitionMap.put("/test/jeecgDemo/rabbitMqClientTest/**", "anon"); //MQ测试
-        //filterChainDefinitionMap.put("/test/jeecgDemo/html", "anon"); //模板页面
-        //filterChainDefinitionMap.put("/test/jeecgDemo/redis/**", "anon"); //redis测试
+        // filterChainDefinitionMap.put("/test/jeecgDemo/rabbitMqClientTest/**",
+        // "anon"); //MQ测试
+        // filterChainDefinitionMap.put("/test/jeecgDemo/html", "anon"); //模板页面
+        // filterChainDefinitionMap.put("/test/jeecgDemo/redis/**", "anon"); //redis测试
 
-        //websocket排除
-        filterChainDefinitionMap.put("/websocket/**", "anon");//系统通知和公告
-        filterChainDefinitionMap.put("/newsWebsocket/**", "anon");//CMS模块
-        filterChainDefinitionMap.put("/vxeSocket/**", "anon");//JVxeTable无痕刷新示例
+        // Chess Game WebSocket (SockJS) - Assuming root context path
+        filterChainDefinitionMap.put("/ws/info/**", "anon");
+        filterChainDefinitionMap.put("/ws/**", "anon");
 
-        //性能监控——安全隐患泄露TOEKN（durid连接池也有）
-        //filterChainDefinitionMap.put("/actuator/**", "anon");
-        //测试模块排除
+        // websocket排除
+        filterChainDefinitionMap.put("/websocket/**", "anon");// 系统通知和公告
+        filterChainDefinitionMap.put("/newsWebsocket/**", "anon");// CMS模块
+        filterChainDefinitionMap.put("/vxeSocket/**", "anon");// JVxeTable无痕刷新示例
+
+        // 性能监控——安全隐患泄露TOEKN（durid连接池也有）
+        // filterChainDefinitionMap.put("/actuator/**", "anon");
+        // 测试模块排除
         filterChainDefinitionMap.put("/test/seata/**", "anon");
 
-        //错误路径排除
+        // 错误路径排除
         filterChainDefinitionMap.put("/error", "anon");
         // 企业微信证书排除
         filterChainDefinitionMap.put("/WW_verify*", "anon");
@@ -184,9 +189,9 @@ public class ShiroConfig {
 
         // 添加自己的过滤器并且取名为jwt
         Map<String, Filter> filterMap = new HashMap<String, Filter>(1);
-        //如果cloudServer为空 则说明是单体 需要加载跨域配置【微服务跨域切换】
+        // 如果cloudServer为空 则说明是单体 需要加载跨域配置【微服务跨域切换】
         Object cloudServer = env.getProperty(CommonConstant.CLOUD_SERVER_KEY);
-        filterMap.put("jwt", new JwtFilter(cloudServer==null));
+        filterMap.put("jwt", new JwtFilter(cloudServer == null));
         shiroFilterFactoryBean.setFilters(filterMap);
         // <!-- 过滤链定义，从上向下顺序执行，一般将/**放在最为下边
         filterChainDefinitionMap.put("/**", "jwt");
@@ -198,13 +203,15 @@ public class ShiroConfig {
         return shiroFilterFactoryBean;
     }
 
-    //update-begin---author:chenrui ---date:20240126  for：【QQYUN-7932】AI助手------------
+    // update-begin---author:chenrui ---date:20240126
+    // for：【QQYUN-7932】AI助手------------
 
     /**
      * spring过滤装饰器 <br/>
      * 因为shiro的filter不支持异步请求,导致所有的异步请求都会报错. <br/>
      * 所以需要用spring的FilterRegistrationBean再代理一下shiro的filter.为他扩展异步支持. <br/>
      * 后续所有异步的接口都需要再这里增加registration.addUrlPatterns("/xxx/xxx");
+     * 
      * @return
      * @author chenrui
      * @date 2024/12/3 19:49
@@ -214,19 +221,21 @@ public class ShiroConfig {
         FilterRegistrationBean registration = new FilterRegistrationBean();
         registration.setFilter(new DelegatingFilterProxy("shiroFilterFactoryBean"));
         registration.setEnabled(true);
-        //update-begin---author:chenrui ---date:20241202  for：[issues/7491]运行时间好长，效率慢 ------------
+        // update-begin---author:chenrui ---date:20241202 for：[issues/7491]运行时间好长，效率慢
+        // ------------
         registration.addUrlPatterns("/test/ai/chat/send");
-        //update-end---author:chenrui ---date:20241202  for：[issues/7491]运行时间好长，效率慢 ------------
+        // update-end---author:chenrui ---date:20241202 for：[issues/7491]运行时间好长，效率慢
+        // ------------
         registration.addUrlPatterns("/airag/flow/run");
         registration.addUrlPatterns("/airag/flow/debug");
         registration.addUrlPatterns("/airag/chat/send");
         registration.addUrlPatterns("/airag/app/debug");
-        //支持异步
+        // 支持异步
         registration.setAsyncSupported(true);
         registration.setDispatcherTypes(DispatcherType.REQUEST, DispatcherType.ASYNC);
         return registration;
     }
-    //update-end---author:chenrui ---date:20240126  for：【QQYUN-7932】AI助手------------
+    // update-end---author:chenrui ---date:20240126 for：【QQYUN-7932】AI助手------------
 
     @Bean("securityManager")
     public DefaultWebSecurityManager securityManager(ShiroRealm myRealm) {
@@ -243,13 +252,14 @@ public class ShiroConfig {
         defaultSessionStorageEvaluator.setSessionStorageEnabled(false);
         subjectDAO.setSessionStorageEvaluator(defaultSessionStorageEvaluator);
         securityManager.setSubjectDAO(subjectDAO);
-        //自定义缓存实现,使用redis
+        // 自定义缓存实现,使用redis
         securityManager.setCacheManager(redisCacheManager());
         return securityManager;
     }
 
     /**
      * 下面的代码是添加注解支持
+     * 
      * @return
      */
     @Bean
@@ -272,7 +282,8 @@ public class ShiroConfig {
     }
 
     @Bean
-    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(DefaultWebSecurityManager securityManager) {
+    public AuthorizationAttributeSourceAdvisor authorizationAttributeSourceAdvisor(
+            DefaultWebSecurityManager securityManager) {
         AuthorizationAttributeSourceAdvisor advisor = new AuthorizationAttributeSourceAdvisor();
         advisor.setSecurityManager(securityManager);
         return advisor;
@@ -288,9 +299,9 @@ public class ShiroConfig {
         log.info("===============(1)创建缓存管理器RedisCacheManager");
         RedisCacheManager redisCacheManager = new RedisCacheManager();
         redisCacheManager.setRedisManager(redisManager());
-        //redis中针对不同用户缓存(此处的id需要对应user实体中的id字段,用于唯一标识)
+        // redis中针对不同用户缓存(此处的id需要对应user实体中的id字段,用于唯一标识)
         redisCacheManager.setPrincipalIdFieldName("id");
-        //用户权限信息缓存时间
+        // 用户权限信息缓存时间
         redisCacheManager.setExpire(200000);
         return redisCacheManager;
     }
@@ -308,7 +319,8 @@ public class ShiroConfig {
     public IRedisManager redisManager() {
         log.info("===============(2)创建RedisManager,连接Redis..");
         IRedisManager manager;
-        // sentinel cluster redis（【issues/5569】shiro集成 redis 不支持 sentinel 方式部署的redis集群 #5569）
+        // sentinel cluster redis（【issues/5569】shiro集成 redis 不支持 sentinel 方式部署的redis集群
+        // #5569）
         if (Objects.nonNull(redisProperties)
                 && Objects.nonNull(redisProperties.getSentinel())
                 && !CollectionUtils.isEmpty(redisProperties.getSentinel().getNodes())) {
@@ -322,32 +334,36 @@ public class ShiroConfig {
         }
 
         // redis 单机支持，在集群为空，或者集群无机器时候使用 add by jzyadmin@163.com
-        if (lettuceConnectionFactory.getClusterConfiguration() == null || lettuceConnectionFactory.getClusterConfiguration().getClusterNodes().isEmpty()) {
+        if (lettuceConnectionFactory.getClusterConfiguration() == null
+                || lettuceConnectionFactory.getClusterConfiguration().getClusterNodes().isEmpty()) {
             RedisManager redisManager = new RedisManager();
             redisManager.setHost(lettuceConnectionFactory.getHostName() + ":" + lettuceConnectionFactory.getPort());
-            //(lettuceConnectionFactory.getPort());
+            // (lettuceConnectionFactory.getPort());
             redisManager.setDatabase(lettuceConnectionFactory.getDatabase());
             redisManager.setTimeout(0);
             if (!StringUtils.isEmpty(lettuceConnectionFactory.getPassword())) {
                 redisManager.setPassword(lettuceConnectionFactory.getPassword());
             }
             manager = redisManager;
-        }else{
+        } else {
             // redis集群支持，优先使用集群配置
             RedisClusterManager redisManager = new RedisClusterManager();
             Set<HostAndPort> portSet = new HashSet<>();
-            lettuceConnectionFactory.getClusterConfiguration().getClusterNodes().forEach(node -> portSet.add(new HostAndPort(node.getHost() , node.getPort())));
-            //update-begin--Author:scott Date:20210531 for：修改集群模式下未设置redis密码的bug issues/I3QNIC
+            lettuceConnectionFactory.getClusterConfiguration().getClusterNodes()
+                    .forEach(node -> portSet.add(new HostAndPort(node.getHost(), node.getPort())));
+            // update-begin--Author:scott Date:20210531 for：修改集群模式下未设置redis密码的bug
+            // issues/I3QNIC
             if (oConvertUtils.isNotEmpty(lettuceConnectionFactory.getPassword())) {
                 JedisCluster jedisCluster = new JedisCluster(portSet, 2000, 2000, 5,
-                    lettuceConnectionFactory.getPassword(), new GenericObjectPoolConfig());
+                        lettuceConnectionFactory.getPassword(), new GenericObjectPoolConfig());
                 redisManager.setPassword(lettuceConnectionFactory.getPassword());
                 redisManager.setJedisCluster(jedisCluster);
             } else {
                 JedisCluster jedisCluster = new JedisCluster(portSet);
                 redisManager.setJedisCluster(jedisCluster);
             }
-            //update-end--Author:scott Date:20210531 for：修改集群模式下未设置redis密码的bug issues/I3QNIC
+            // update-end--Author:scott Date:20210531 for：修改集群模式下未设置redis密码的bug
+            // issues/I3QNIC
             manager = redisManager;
         }
         return manager;
@@ -357,14 +373,14 @@ public class ShiroConfig {
         List<String> urls = new ArrayList<>();
         for (String base : bases) {
             for (String uri : uris) {
-                urls.add(prefix(base)+prefix(uri));
+                urls.add(prefix(base) + prefix(uri));
             }
         }
         return urls;
     }
 
     private String prefix(String seg) {
-        return seg.startsWith("/") ? seg : "/"+seg;
+        return seg.startsWith("/") ? seg : "/" + seg;
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.Map;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
+import java.util.ArrayList;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -43,63 +44,143 @@ import com.alibaba.fastjson.JSON;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 
- /**
+/**
  * @Description: 游戏
  * @Author: jeecg-boot
- * @Date:   2025-04-27
+ * @Date: 2025-04-27
  * @Version: V1.0
  */
 @Slf4j
-@Tag(name="游戏")
+@Tag(name = "游戏")
 @RestController
 @RequestMapping("/game/chessGame")
 public class ChessGameController extends JeecgController<ChessGame, IChessGameService> {
 	@Autowired
 	private IChessGameService chessGameService;
 
+	/**
+	 * 游戏初始化
+	 *
+	 * @param invitingPlayerInfoFromRequest
+	 *
+	 * @return
+	 */
+	@AutoLog(value = "游戏初始化")
+	@Operation(summary = "游戏初始化")
+	@PostMapping(value = "/init")
+	public Result<?> gameInit(@RequestBody PlayerPairVO invitingPlayerInfoFromRequest) {
+		LoginUser currentUser = (LoginUser) SecurityUtils.getSubject().getPrincipal(); // 这是接受邀请的人
 
-	 /**
-	  * 游戏初始化
-	  *
-	  * @param targetPlayerPairVO
-	  *
-	  * @return
-	  */
-	 @AutoLog(value = "游戏初始化")
-	 @Operation(summary = "游戏初始化")
-	 @PostMapping(value = "/init")
-	 public Result<?> gameInit(@RequestBody PlayerPairVO targetPlayerPairVO){
-		 LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();//获取登录用户信息
-		 PlayerPairVO objSourcePlayerPairVO = new PlayerPairVO();
-		 objSourcePlayerPairVO.setUserId(sysUser.getId());
-		 objSourcePlayerPairVO.setUserAccount(sysUser.getUsername());//账号
-		 if(targetPlayerPairVO.getHoldChess() == 1){
-			 objSourcePlayerPairVO.setHoldChess(2);
-		 }else{
-			 objSourcePlayerPairVO.setHoldChess(1);
-		 }
-		 ChessGameVO objChessGameVO = chessGameService.init(objSourcePlayerPairVO,targetPlayerPairVO);
-		 return Result.OK("成功",objChessGameVO);
-	 }
+		PlayerPairVO acceptingPlayerPairVO = new PlayerPairVO();
+		acceptingPlayerPairVO.setUserId(currentUser.getId());
+		acceptingPlayerPairVO.setUserAccount(currentUser.getUsername());
 
+		// invitingPlayerInfoFromRequest 应包含最初邀请者的信息和 sourceInviteId
+		// 以及最初邀请者选择的执棋，或接受者选择的执棋（取决于前端如何设计）
 
-	 /**
-	  * 游戏进入
-	  *
-	  *
-	  * @return
-	  */
-	 @AutoLog(value = "当前登录用户进入游戏")
-	 @Operation(summary = "当前登录用户进入游戏")
-	 @PostMapping(value = "/enter")
-	 public Result<?> gameEnter(){
-		 //获取当前登录用户
-		 LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+		// 关键：确保 sourceInviteId 是从 invitingPlayerInfoFromRequest 获取并设置给发起游戏的玩家
+		// 同时，也需要确定谁设置了执棋方 (holdChess)
+		// 假设: invitingPlayerInfoFromRequest.getHoldChess() 是 *邀请者* 当时选择的自己要执的棋
+		// 那么接受者执相反的棋
+		if (invitingPlayerInfoFromRequest.getHoldChess() == 1) { // 邀请者选黑
+			acceptingPlayerPairVO.setHoldChess(2); // 接受者执白
+		} else { // 邀请者选白 (或未指定，则默认为白，接受者执黑)
+			acceptingPlayerPairVO.setHoldChess(1); // 接受者执黑
+		}
 
-		 List<ChessGameBatchVO> lstResult = chessGameService.enter(sysUser.getId());
+		// sourceInviteId 应该由 invitingPlayerInfoFromRequest 提供，并传递给服务层
+		// 服务层会将这个 sourceInviteId 存到 ChessGame 表中
+		// 并且，服务层 init 方法的第一个参数是"当前操作者/接受者"，第二个参数是"对手/邀请者"
 
-		 return Result.OK("成功",lstResult);
-	 }
+		// 我们需要将邀请者的数据 (invitingPlayerInfoFromRequest) 作为"对手"传给 service.init
+		// 将接受者的数据 (acceptingPlayerPairVO) 作为"当前玩家"传给 service.init
+
+		// 为了符合 service.init(source, target) 的语义，其中 source 是当前操作者，target 是对手：
+		// sourcePlayerPariVO 应该是 acceptingPlayerPairVO
+		// targetPlayerPairVO 应该是 invitingPlayerInfoFromRequest
+
+		PlayerPairVO serviceSourceArg = acceptingPlayerPairVO; // 接受者 (当前用户)
+		PlayerPairVO serviceTargetArg = invitingPlayerInfoFromRequest; // 邀请者 (对手)
+
+		// 确保 serviceTargetArg (邀请者一方) 也携带了 sourceInviteId，如果它是由邀请方信息带来的
+		// 如果 sourceInviteId 是顶层传入，且不属于 invitingPlayerInfoFromRequest 的一部分，则需要显式设置
+		// 但通常设计是 invitingPlayerInfoFromRequest (作为对手方/邀请方数据载体)应该包含它自己的相关信息，包括它发起的邀请ID
+		if (invitingPlayerInfoFromRequest.getSourceInviteId() != null
+				&& !invitingPlayerInfoFromRequest.getSourceInviteId().isEmpty()) {
+			// 如果邀请方信息中已包含sourceInviteId, 确保serviceSourceArg(接受者)也知晓此ID以供服务层统一处理
+			// 服务层init方法会从第一个参数获取sourceInviteId
+			serviceSourceArg.setSourceInviteId(invitingPlayerInfoFromRequest.getSourceInviteId());
+		}
+
+		// log.info("Calling chessGameService.init with: ");
+		// log.info(" Accepting Player (Service Source Arg): userId={}, account={},
+		// holdChess={}, sourceInviteId={}",
+		// serviceSourceArg.getUserId(), serviceSourceArg.getUserAccount(),
+		// serviceSourceArg.getHoldChess(), serviceSourceArg.getSourceInviteId());
+		// log.info(" Inviting Player (Service Target Arg): userId={}, account={},
+		// holdChess={}, sourceInviteId={}",
+		// serviceTargetArg.getUserId(), serviceTargetArg.getUserAccount(),
+		// serviceTargetArg.getHoldChess(), serviceTargetArg.getSourceInviteId());
+
+		ChessGameVO objChessGameVO = chessGameService.init(serviceSourceArg, serviceTargetArg);
+
+		if (objChessGameVO.getErrorMessage() != null) {
+			return Result.error("游戏初始化失败: " + objChessGameVO.getErrorMessage());
+		}
+		return Result.OK("成功", objChessGameVO);
+	}
+
+	/**
+	 * 游戏进入
+	 *
+	 * @return
+	 */
+	@AutoLog(value = "当前登录用户进入游戏")
+	@Operation(summary = "当前登录用户进入游戏")
+	@PostMapping(value = "/enter")
+	public Result<?> gameEnter(@RequestParam(required = false) String inviteId) {
+		// 获取当前登录用户
+		LoginUser sysUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+		// log.info("用户 [账号:" + sysUser.getUsername() + ", ID:" + sysUser.getId() + "]
+		// 尝试进入游戏. 提供的邀请ID: " + inviteId);
+
+		List<ChessGameBatchVO> lstResult;
+		if (inviteId != null && !inviteId.isEmpty()) {
+			// log.info("尝试通过邀请ID: " + inviteId + " 进入游戏");
+			QueryWrapper<ChessGame> directQuery = new QueryWrapper<>();
+			directQuery.eq("source_invite_id", inviteId);
+			directQuery.eq("game_state", 1); // 游戏进行中
+			directQuery.eq("del_flag", 0); // 未删除
+			List<ChessGame> games = chessGameService.list(directQuery);
+
+			if (games != null && !games.isEmpty()) {
+				// log.info("通过邀请ID: " + inviteId + " 找到 " + games.size() + " 个游戏");
+				lstResult = new ArrayList<>();
+				for (ChessGame game : games) {
+					ChessGameBatchVO vo = new ChessGameBatchVO();
+					vo.setGameId(game.getId());
+					lstResult.add(vo);
+				}
+			} else {
+				// log.info("未通过邀请ID: " + inviteId + " 找到游戏，尝试通过用户ID: " + sysUser.getId() + "
+				// 进入");
+				lstResult = chessGameService.enter(sysUser.getId());
+			}
+		} else {
+			// log.info("未提供邀请ID，尝试通过用户ID: " + sysUser.getId() + " 进入游戏");
+			lstResult = chessGameService.enter(sysUser.getId());
+		}
+
+		if (lstResult == null || lstResult.isEmpty()) {
+			// log.warn("用户 [账号:" + sysUser.getUsername() + ", ID:" + sysUser.getId() + "]
+			// 未能进入任何游戏. InviteId: " + inviteId);
+			return Result.error("未能找到您可以进入的游戏。");
+		}
+
+		// log.info("用户 [账号:" + sysUser.getUsername() + ", ID:" + sysUser.getId() + "]
+		// 成功进入游戏，找到 " + lstResult.size() + " 个可进入的游戏局.");
+		return Result.OK("成功", lstResult);
+	}
 
 	/**
 	 * 分页列表查询
@@ -114,15 +195,15 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	@Operation(summary = "游戏-分页列表查询")
 	@GetMapping(value = "/list")
 	public Result<?> queryPageList(ChessGame chessGame,
-								   @RequestParam(name="pageNo", defaultValue="1") Integer pageNo,
-								   @RequestParam(name="pageSize", defaultValue="10") Integer pageSize,
-								   HttpServletRequest req) {
+			@RequestParam(name = "pageNo", defaultValue = "1") Integer pageNo,
+			@RequestParam(name = "pageSize", defaultValue = "10") Integer pageSize,
+			HttpServletRequest req) {
 		QueryWrapper<ChessGame> queryWrapper = QueryGenerator.initQueryWrapper(chessGame, req.getParameterMap());
 		Page<ChessGame> page = new Page<ChessGame>(pageNo, pageSize);
 		IPage<ChessGame> pageList = chessGameService.page(page, queryWrapper);
 		return Result.OK(pageList);
 	}
-	
+
 	/**
 	 * 添加
 	 *
@@ -136,7 +217,7 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 		chessGameService.save(chessGame);
 		return Result.OK("添加成功！");
 	}
-	
+
 	/**
 	 * 编辑
 	 *
@@ -145,12 +226,12 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	 */
 	@AutoLog(value = "游戏-编辑")
 	@Operation(summary = "游戏-编辑")
-	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
+	@RequestMapping(value = "/edit", method = { RequestMethod.PUT, RequestMethod.POST })
 	public Result<?> edit(@RequestBody ChessGame chessGame) {
 		chessGameService.updateById(chessGame);
 		return Result.OK("编辑成功!");
 	}
-	
+
 	/**
 	 * 通过id删除
 	 *
@@ -160,11 +241,11 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	@AutoLog(value = "游戏-通过id删除")
 	@Operation(summary = "游戏-通过id删除")
 	@DeleteMapping(value = "/delete")
-	public Result<?> delete(@RequestParam(name="id",required=true) String id) {
+	public Result<?> delete(@RequestParam(name = "id", required = true) String id) {
 		chessGameService.removeById(id);
 		return Result.OK("删除成功!");
 	}
-	
+
 	/**
 	 * 批量删除
 	 *
@@ -174,11 +255,11 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	@AutoLog(value = "游戏-批量删除")
 	@Operation(summary = "游戏-批量删除")
 	@DeleteMapping(value = "/deleteBatch")
-	public Result<?> deleteBatch(@RequestParam(name="ids",required=true) String ids) {
+	public Result<?> deleteBatch(@RequestParam(name = "ids", required = true) String ids) {
 		this.chessGameService.removeByIds(Arrays.asList(ids.split(",")));
 		return Result.OK("批量删除成功！");
 	}
-	
+
 	/**
 	 * 通过id查询
 	 *
@@ -188,32 +269,32 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	@AutoLog(value = "游戏-通过id查询")
 	@Operation(summary = "游戏-通过id查询")
 	@GetMapping(value = "/queryById")
-	public Result<?> queryById(@RequestParam(name="id",required=true) String id) {
+	public Result<?> queryById(@RequestParam(name = "id", required = true) String id) {
 		ChessGame chessGame = chessGameService.getById(id);
 		return Result.OK(chessGame);
 	}
 
-  /**
-   * 导出excel
-   *
-   * @param request
-   * @param chessGame
-   */
-  @RequestMapping(value = "/exportXls")
-  public ModelAndView exportXls(HttpServletRequest request, ChessGame chessGame) {
-      return super.exportXls(request, chessGame, ChessGame.class, "游戏");
-  }
+	/**
+	 * 导出excel
+	 *
+	 * @param request
+	 * @param chessGame
+	 */
+	@RequestMapping(value = "/exportXls")
+	public ModelAndView exportXls(HttpServletRequest request, ChessGame chessGame) {
+		return super.exportXls(request, chessGame, ChessGame.class, "游戏");
+	}
 
-  /**
-   * 通过excel导入数据
-   *
-   * @param request
-   * @param response
-   * @return
-   */
-  @RequestMapping(value = "/importExcel", method = RequestMethod.POST)
-  public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
-      return super.importExcel(request, response, ChessGame.class);
-  }
+	/**
+	 * 通过excel导入数据
+	 *
+	 * @param request
+	 * @param response
+	 * @return
+	 */
+	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
+	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
+		return super.importExcel(request, response, ChessGame.class);
+	}
 
 }

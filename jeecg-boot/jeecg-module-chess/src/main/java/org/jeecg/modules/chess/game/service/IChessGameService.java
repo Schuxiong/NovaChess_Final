@@ -19,10 +19,15 @@ public interface IChessGameService extends IService<ChessGame> {
 
     /**
      * 初始化游戏信息
-     * @param playerPairVO
+     * @param
      */
     public ChessGameVO init(PlayerPairVO sourcePlayerPariVO, PlayerPairVO targetPlayerPairVO);
 
 
+
     public List<ChessGameBatchVO> enter(String userId);
+
+
+
+    public ChessGameVO  getChessGameChessPieces(String chessGameId,String userId);
 }

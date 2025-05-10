@@ -102,13 +102,13 @@ public class ChessFriendPairController extends JeecgController<ChessFriendPair, 
 			ChessFriendPair existing = existingList.get(0);
 			chessFriendPair.setId(existing.getId());
 			chessFriendPairService.updateById(chessFriendPair);
-			return Result.OK("邀请已更新！");
+			return Result.OK(Map.of("status", "updated", "message", "邀请已更新！", "id", chessFriendPair.getId()));
 		}
 		
 		// 设置邀请状态为待接受(0)
 		chessFriendPair.setInviteStatus(0);
 		chessFriendPairService.save(chessFriendPair);
-		return Result.OK("添加成功！");
+		return Result.OK(Map.of("status", "created", "message", "添加成功！", "id", chessFriendPair.getId()));
 	}
 	
 	/**

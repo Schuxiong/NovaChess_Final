@@ -18,18 +18,22 @@ import org.jeecg.modules.chess.game.vo.PlayerPairVO;
 import org.jeecg.modules.chess.score.entity.ChessPlayerScore;
 import org.jeecg.modules.chess.score.service.IChessPlayerScoreService;
 import org.jeecg.modules.chess.util.Constant;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
+import javax.transaction.Transactional;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.Objects;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * @Description: 游戏
@@ -39,6 +43,7 @@ import java.util.HashMap;
  */
 @Service
 public class ChessGameServiceImpl extends ServiceImpl<ChessGameMapper, ChessGame> implements IChessGameService {
+    private static final Logger log = LoggerFactory.getLogger(ChessGameServiceImpl.class);
 
     @Autowired
     private IChessPlayerService chessPlayerService;
@@ -51,6 +56,40 @@ public class ChessGameServiceImpl extends ServiceImpl<ChessGameMapper, ChessGame
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    // 添加一个简单的棋盘缓存
+    private final Map<String, List<ChessPieces>> gameBoardCache = new ConcurrentHashMap<>();
+
+    /**
+     * 更新棋盘缓存
+     * 
+     * @param chessGameId 游戏ID
+     * @param pieces      棋子列表
+     */
+    public void updateBoardCache(String chessGameId, List<ChessPieces> pieces) {
+        if (chessGameId == null || pieces == null) {
+            return;
+        }
+
+        log.info("更新游戏{}的棋盘缓存，包含{}个棋子", chessGameId, pieces.size());
+        gameBoardCache.put(chessGameId, new ArrayList<>(pieces));
+    }
+
+    // 从缓存获取棋盘
+    private List<ChessPieces> getBoardFromCache(String gameId) {
+        List<ChessPieces> cachedPieces = gameBoardCache.get(gameId);
+        if (cachedPieces != null && !cachedPieces.isEmpty()) {
+            log.info("从缓存获取到游戏{}的{}个棋子", gameId, cachedPieces.size());
+            return new ArrayList<>(cachedPieces);
+        }
+        return null;
+    }
+
+    // 清除特定游戏的缓存
+    private void clearBoardCache(String gameId) {
+        gameBoardCache.remove(gameId);
+        log.info("已清除游戏{}的棋盘缓存", gameId);
+    }
 
     @Override
     public ChessGameVO init(PlayerPairVO sourcePlayerPariVO, PlayerPairVO targetPlayerPairVO) {
@@ -148,8 +187,10 @@ public class ChessGameServiceImpl extends ServiceImpl<ChessGameMapper, ChessGame
             objChessGame.setId(strChessGameId);
 
             // Determine black and white based on who holds which color
-            // objSource represents the inviting player (parameter 1 from controller, who initiated the game setup)
-            // objTarget represents the accepting player (parameter 2 from controller, who is the current user processing the invitation)
+            // objSource represents the inviting player (parameter 1 from controller, who
+            // initiated the game setup)
+            // objTarget represents the accepting player (parameter 2 from controller, who
+            // is the current user processing the invitation)
             if (objSource.getHoldChess() == 1) { // Inviting player (objSource) chooses black
                 objChessGame.setBlackPlayId(objSource.getUserId()); // Use inviter's actual user ID
                 objChessGame.setBlackPlayAccount(objSource.getUserAccount()); // Inviter's account
@@ -191,6 +232,9 @@ public class ChessGameServiceImpl extends ServiceImpl<ChessGameMapper, ChessGame
             // 5.初始化棋盘信息
             log.debug("初始化棋子位置");
             List<ChessPieces> lstChessPieces = chessPiecesService.initPosition(strChessGameId);// 初始化棋子位置
+
+            // 更新棋盘缓存
+            updateBoardCache(strChessGameId, lstChessPieces);
 
             // 创建返回对象
             ChessGameVO objChessGameVO = new ChessGameVO();
@@ -344,33 +388,194 @@ public class ChessGameServiceImpl extends ServiceImpl<ChessGameMapper, ChessGame
     /**
      * 获取当前棋子位置信息
      * 
-     * @param chessGameId
-     * @param userId
-     * @return
+     * @param chessGameId 游戏ID
+     * @param userId      用户ID
+     * @return 游戏棋盘状态
      */
     @Override
     public ChessGameVO getChessGameChessPieces(String chessGameId, String userId) {
-        QueryWrapper<ChessPieces> queryWrapper = new QueryWrapper<>();
+        return getChessGameChessPieces(chessGameId, userId, null);
+    }
 
-        queryWrapper.eq("chess_game_id", chessGameId);
-        queryWrapper.eq("del_flag", 0);
-        List<ChessPieces> lstChessPieces = chessPiecesService.list(queryWrapper);
+    /**
+     * 获取当前棋子位置信息（带参数）
+     * 
+     * @param chessGameId 游戏ID
+     * @param userId      用户ID
+     * @param params      附加参数，如afterMove标志
+     * @return 游戏棋盘状态
+     */
+    @Transactional
+    @Override
+    public ChessGameVO getChessGameChessPieces(String chessGameId, String userId, Map<String, Object> params) {
+        // 使用同步块防止并发初始化
+        synchronized (this) {
+            try {
+                boolean isAfterMove = params != null && Boolean.TRUE.equals(params.get("afterMove"));
+                boolean skipInitialization = params != null && Boolean.TRUE.equals(params.get("skipInitialization"));
 
-        QueryWrapper<ChessPlayer> queryPlayerWrapper = new QueryWrapper<>();
-        queryPlayerWrapper.eq("chess_game_id", chessGameId);
-        queryPlayerWrapper.eq("user_id", userId);
-        queryPlayerWrapper.eq("del_flag", 0);
-        ChessPlayer objChessPlayer = chessPlayerService.getOne(queryPlayerWrapper);
+                log.info("开始获取游戏{}的棋盘信息, afterMove={}, skipInitialization={}",
+                        chessGameId, isAfterMove, skipInitialization);
 
-        // 获取游戏信息，包括当前轮次
-        ChessGame objChessGame = this.getById(chessGameId);
+                // 优先尝试获取缓存
+                List<ChessPieces> cachedPieces = getBoardFromCache(chessGameId);
 
-        ChessGameVO objChessGameVO = new ChessGameVO();
-        objChessGameVO.setGameId(chessGameId);
-        objChessGameVO.setCurrentUserId(userId);
-        objChessGameVO.setCurrentHoldChess(objChessPlayer.getHoldChess());
-        objChessGameVO.setCurrentTurn(objChessGame.getCurrentTurn());
-        objChessGameVO.setChessPiecesList(lstChessPieces);
-        return objChessGameVO;
+                // 如果是移动后的请求，强制从数据库重新加载棋子
+                if (isAfterMove) {
+                    // 强制刷新缓存，从数据库获取最新数据
+                    log.info("移动后的请求，强制从数据库加载最新棋子数据");
+                    // 清除旧缓存
+                    clearBoardCache(chessGameId);
+                    // 设置缓存为空，强制查询数据库
+                    cachedPieces = null;
+                } else if (cachedPieces != null && !cachedPieces.isEmpty()) {
+                    // 非移动后请求，可以使用有效缓存
+                    log.info("使用缓存中的棋盘数据，跳过数据库查询，棋子数量: {}", cachedPieces.size());
+
+                    // 获取玩家和游戏信息
+                    QueryWrapper<ChessPlayer> queryPlayerWrapper = new QueryWrapper<>();
+                    queryPlayerWrapper.eq("chess_game_id", chessGameId);
+                    queryPlayerWrapper.eq("user_id", userId);
+                    queryPlayerWrapper.eq("del_flag", 0);
+                    ChessPlayer objChessPlayer = chessPlayerService.getOne(queryPlayerWrapper);
+
+                    // 获取游戏信息，包括当前轮次
+                    ChessGame objChessGame = this.getById(chessGameId);
+
+                    ChessGameVO objChessGameVO = new ChessGameVO();
+                    objChessGameVO.setGameId(chessGameId);
+                    objChessGameVO.setCurrentUserId(userId);
+                    objChessGameVO.setCurrentHoldChess(objChessPlayer != null ? objChessPlayer.getHoldChess() : null);
+                    objChessGameVO.setCurrentTurn(objChessGame != null ? objChessGame.getCurrentTurn() : 2); // 默认白方先行
+                    objChessGameVO.setChessPiecesList(cachedPieces);
+                    return objChessGameVO;
+                }
+
+                // 查询数据库中的棋子
+                QueryWrapper<ChessPieces> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("chess_game_id", chessGameId);
+                // 放宽条件，先不过滤del_flag
+                List<ChessPieces> allPieces = chessPiecesService.list(queryWrapper);
+
+                log.info("查询到游戏{}的总棋子数量: {}", chessGameId, allPieces != null ? allPieces.size() : 0);
+
+                // 如果找到棋子，过滤掉已删除的
+                if (allPieces != null && !allPieces.isEmpty()) {
+                    allPieces = allPieces.stream()
+                            .filter(p -> p.getDelFlag() == null || p.getDelFlag() == 0)
+                            .collect(java.util.stream.Collectors.toList());
+                    log.info("过滤del_flag后的棋子数量: {}", allPieces.size());
+                }
+
+                // 如果是移动后的请求，即使没有查到棋子也不要初始化
+                if ((allPieces == null || allPieces.isEmpty()) && !skipInitialization && !isAfterMove) {
+                    log.info("棋盘上没有任何棋子，为游戏{}初始化新棋子", chessGameId);
+                    allPieces = chessPiecesService.initPosition(chessGameId);
+                    // 更新缓存
+                    updateBoardCache(chessGameId, allPieces);
+                } else if (allPieces != null && !allPieces.isEmpty()) {
+                    // 过滤活跃棋子
+                    List<ChessPieces> activePieces = allPieces.stream()
+                            .filter(p -> p.getPiecesState() == 1)
+                            .collect(java.util.stream.Collectors.toList());
+
+                    log.info("游戏{}的活跃棋子数量: {}", chessGameId, activePieces.size());
+
+                    // 如果没有活跃棋子但有非活跃棋子，激活它们
+                    if (activePieces.isEmpty() && !skipInitialization) {
+                        log.info("游戏{}没有活跃棋子，激活现有棋子", chessGameId);
+                        for (ChessPieces piece : allPieces) {
+                            piece.setPiecesState(1);
+                            chessPiecesService.updateById(piece);
+                        }
+                        // 重新加载所有棋子作为活跃棋子
+                        activePieces = new ArrayList<>(allPieces);
+                    }
+
+                    // 检查是否存在重复的活跃棋子
+                    Map<String, List<ChessPieces>> piecesByPosition = new HashMap<>();
+                    for (ChessPieces piece : activePieces) {
+                        String position = piece.getPositionX() + piece.getPositionY();
+                        if (!piecesByPosition.containsKey(position)) {
+                            piecesByPosition.put(position, new ArrayList<>());
+                        }
+                        piecesByPosition.get(position).add(piece);
+                    }
+
+                    // 处理重复棋子
+                    boolean hasDuplicates = false;
+                    for (Map.Entry<String, List<ChessPieces>> entry : piecesByPosition.entrySet()) {
+                        if (entry.getValue().size() > 1) {
+                            hasDuplicates = true;
+                            log.warn("位置{}发现{}个重复棋子", entry.getKey(), entry.getValue().size());
+
+                            // 保留第一个，其余设为非活跃
+                            for (int i = 1; i < entry.getValue().size(); i++) {
+                                ChessPieces duplicatePiece = entry.getValue().get(i);
+                                duplicatePiece.setPiecesState(0);
+                                chessPiecesService.updateById(duplicatePiece);
+                                log.info("设置重复棋子{}为非活跃", duplicatePiece.getId());
+                            }
+                        }
+                    }
+
+                    // 如果存在重复棋子，重新获取活跃棋子列表
+                    if (hasDuplicates) {
+                        QueryWrapper<ChessPieces> activeQuery = new QueryWrapper<>();
+                        activeQuery.eq("chess_game_id", chessGameId);
+                        activeQuery.eq("pieces_state", 1); // 活跃的棋子
+                        activeQuery.eq("del_flag", 0);
+                        activePieces = chessPiecesService.list(activeQuery);
+                    }
+
+                    // 设置返回的棋子列表为当前活跃的棋子
+                    allPieces = activePieces;
+
+                    // 更新缓存
+                    updateBoardCache(chessGameId, allPieces);
+                }
+
+                // 如果所有查询后仍然没有棋子，但缓存有棋子，使用缓存数据
+                if ((allPieces == null || allPieces.isEmpty()) && cachedPieces != null && !cachedPieces.isEmpty()) {
+                    log.info("数据库查询无结果，使用缓存的{}个棋子", cachedPieces.size());
+                    allPieces = cachedPieces;
+                }
+
+                // 打印部分棋子位置，用于调试
+                log.info("返回活跃棋子数量: {}", allPieces != null ? allPieces.size() : 0);
+                if (allPieces != null && !allPieces.isEmpty()) {
+                    for (int i = 0; i < Math.min(5, allPieces.size()); i++) {
+                        ChessPieces piece = allPieces.get(i);
+                        log.info("棋子 {}: 类型={}, 位置={}{}",
+                                piece.getId(), piece.getChessPiecesName(),
+                                piece.getPositionX(), piece.getPositionY());
+                    }
+                }
+
+                QueryWrapper<ChessPlayer> queryPlayerWrapper = new QueryWrapper<>();
+                queryPlayerWrapper.eq("chess_game_id", chessGameId);
+                queryPlayerWrapper.eq("user_id", userId);
+                queryPlayerWrapper.eq("del_flag", 0);
+                ChessPlayer objChessPlayer = chessPlayerService.getOne(queryPlayerWrapper);
+
+                // 获取游戏信息，包括当前轮次
+                ChessGame objChessGame = this.getById(chessGameId);
+
+                ChessGameVO objChessGameVO = new ChessGameVO();
+                objChessGameVO.setGameId(chessGameId);
+                objChessGameVO.setCurrentUserId(userId);
+                objChessGameVO.setCurrentHoldChess(objChessPlayer != null ? objChessPlayer.getHoldChess() : null);
+                objChessGameVO.setCurrentTurn(objChessGame != null ? objChessGame.getCurrentTurn() : 2); // 默认白方先行
+                objChessGameVO.setChessPiecesList(allPieces);
+                return objChessGameVO;
+            } catch (Exception e) {
+                log.error("获取棋盘信息失败", e);
+                ChessGameVO errorResult = new ChessGameVO();
+                errorResult.setGameId(chessGameId);
+                errorResult.setCurrentUserId(userId);
+                errorResult.setErrorMessage("获取棋盘信息失败: " + e.getMessage());
+                return errorResult;
+            }
+        }
     }
 }

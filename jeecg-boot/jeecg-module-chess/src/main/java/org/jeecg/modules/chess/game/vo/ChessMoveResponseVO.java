@@ -15,6 +15,9 @@ public class ChessMoveResponseVO implements Serializable {
     /** 操作是否成功 **/
     private Boolean success = true;
 
+    /** 错误信息 **/
+    private String errorMessage;
+
     /** 最新的游戏状态 **/
     private ChessGameVO latestGameState;
 }

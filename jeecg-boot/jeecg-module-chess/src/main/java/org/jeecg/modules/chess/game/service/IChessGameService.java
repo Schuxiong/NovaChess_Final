@@ -8,26 +8,57 @@ import org.jeecg.modules.chess.game.vo.ChessGameVO;
 import org.jeecg.modules.chess.game.vo.PlayerPairVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @Description: 游戏
  * @Author: jeecg-boot
- * @Date:   2025-04-27
+ * @Date: 2025-04-27
  * @Version: V1.0
  */
 public interface IChessGameService extends IService<ChessGame> {
 
     /**
-     * 初始化游戏信息
-     * @param
+     * 初始化游戏
+     * 
+     * @param sourcePlayerPariVO 挑战者
+     * @param targetPlayerPairVO 被挑战者
+     * @return
      */
-    public ChessGameVO init(PlayerPairVO sourcePlayerPariVO, PlayerPairVO targetPlayerPairVO);
+    ChessGameVO init(PlayerPairVO sourcePlayerPariVO, PlayerPairVO targetPlayerPairVO);
 
+    /**
+     * 进入游戏
+     * 
+     * @param userId
+     * @return
+     */
+    List<ChessGameBatchVO> enter(String userId);
 
+    /**
+     * 获取当前棋子位置信息
+     * 
+     * @param chessGameId 游戏ID
+     * @param userId      用户ID
+     * @return 游戏棋盘状态
+     */
+    ChessGameVO getChessGameChessPieces(String chessGameId, String userId);
 
-    public List<ChessGameBatchVO> enter(String userId);
+    /**
+     * 获取当前棋子位置信息（带参数）
+     * 
+     * @param chessGameId 游戏ID
+     * @param userId      用户ID
+     * @param params      附加参数，如afterMove标志
+     * @return 游戏棋盘状态
+     */
+    ChessGameVO getChessGameChessPieces(String chessGameId, String userId, Map<String, Object> params);
 
-
-
-    public ChessGameVO  getChessGameChessPieces(String chessGameId,String userId);
+    /**
+     * 更新棋盘缓存
+     * 
+     * @param chessGameId 游戏ID
+     * @param pieces      棋子列表
+     */
+    void updateBoardCache(String chessGameId, List<ChessPieces> pieces);
 }

@@ -20,13 +20,18 @@ public class ChatChessMoveRequestVO implements Serializable {
 
     private Integer piecesType;
 
+    /** 单独的坐标表示 **/
     private String fromPositionX;
-
     private String fromPositionY;
-
     private String toPositionX;
-
     private String toPositionY;
+
+    /** 完整的坐标表示 (例如 "F2") **/
+    private String fromPosition;
+    private String toPosition;
+
+    /** 升变选择，如果兵升变为其他棋子 **/
+    private String promotionPieceType;
 
     private ChatChessMoveRequestVO.MessageType type;
 

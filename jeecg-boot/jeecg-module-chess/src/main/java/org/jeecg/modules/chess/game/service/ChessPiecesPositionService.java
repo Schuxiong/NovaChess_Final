@@ -1,6 +1,5 @@
 package org.jeecg.modules.chess.game.service;
 
-
 import org.jeecg.common.util.UUIDGenerator;
 import org.jeecg.modules.chess.game.entity.ChessPieces;
 import org.springframework.stereotype.Service;
@@ -11,17 +10,24 @@ import java.util.List;
 @Service
 public class ChessPiecesPositionService {
 
-
-    public List<ChessPieces> obtainChessPiecesList(String chessGameId){
+    public List<ChessPieces> obtainChessPiecesList(String chessGameId) {
         List<ChessPieces> lstChessPieces = new LinkedList<>();
+
+        // 添加所有棋子到列表中
+        lstChessPieces.addAll(obtainChessPieces(chessGameId, "King"));
+        lstChessPieces.addAll(obtainChessPieces(chessGameId, "Queen"));
+        lstChessPieces.addAll(obtainChessPieces(chessGameId, "Rook"));
+        lstChessPieces.addAll(obtainChessPieces(chessGameId, "Bishop"));
+        lstChessPieces.addAll(obtainChessPieces(chessGameId, "Knight"));
+        lstChessPieces.addAll(obtainChessPieces(chessGameId, "Pawn"));
 
         return lstChessPieces;
     }
 
-    private List<ChessPieces> obtainChessPieces(String chessGameId,String chessPiecesName){
+    private List<ChessPieces> obtainChessPieces(String chessGameId, String chessPiecesName) {
         List<ChessPieces> lstChessPieces = new LinkedList<>();
 
-        switch (chessPiecesName){
+        switch (chessPiecesName) {
             case "King":
                 ChessPieces objBlackKing = new ChessPieces();
                 objBlackKing.setId(UUIDGenerator.generate());
@@ -326,9 +332,8 @@ public class ChessPiecesPositionService {
                 objWhitePawn8.setPiecesType(2);
                 objWhitePawn8.setPositionX("H");
                 objWhitePawn8.setPositionY("2");
-                lstChessPieces.add(objBlackPawn8);
+                lstChessPieces.add(objWhitePawn8);
                 break;
-
 
         }
         return lstChessPieces;

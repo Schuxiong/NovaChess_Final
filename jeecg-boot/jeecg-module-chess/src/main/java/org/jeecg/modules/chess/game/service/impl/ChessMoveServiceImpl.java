@@ -26,6 +26,7 @@ import org.jeecg.modules.chess.score.entity.ChessPlayerScoreRecord;
 import org.jeecg.modules.chess.score.service.IChessPlayerScoreRecordService;
 import org.jeecg.modules.chess.score.service.IChessPlayerScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -60,6 +61,9 @@ public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveMapper, ChessMove
 
     @Autowired
     private IChessPlayerScoreRecordService chessPlayerScoreRecordService;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     @Transactional
     @Override
@@ -237,47 +241,127 @@ public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveMapper, ChessMove
      */
     @Transactional
     private void winChess(ChessMove chessMove) {
+        try {
+            ChessGame objChessGame = chessGameService.getById(chessMove.getChessGameId());
+            if (objChessGame == null) {
+                log.error("游戏结束处理失败：未找到游戏 {}", chessMove.getChessGameId());
+                return;
+            }
 
-        ChessGame objChessGame = chessGameService.getById(chessMove.getChessGameId());
-        objChessGame.setGameState(2);
-        // 获取棋手信息
-        ChessPlayer objBlackChessPlayer = chessPlayerService.getById(objChessGame.getBlackPlayId());
-        ChessPlayer objWhiteChessPlayer = chessPlayerService.getById(objChessGame.getWhitePlayId());
-        QueryWrapper<ChessPlayerScore> scoreQueryWrapper = new QueryWrapper<>();
-        scoreQueryWrapper.eq("user_id", objBlackChessPlayer.getUserId());
-        ChessPlayerScore objBlackScore = chessPlayerScoreService.getOne(scoreQueryWrapper);
-        scoreQueryWrapper.clear();
-        scoreQueryWrapper.eq("user_id", objWhiteChessPlayer.getUserId());
-        ChessPlayerScore objWhiteScore = chessPlayerScoreService.getOne(scoreQueryWrapper);
+            objChessGame.setGameState(2); // 设置游戏结束状态
+            chessGameService.updateById(objChessGame);
 
-        ChessPlayerScoreRecord objBlackChessPlayerScoreRecord = new ChessPlayerScoreRecord();
-        objBlackChessPlayerScoreRecord.setId(UUIDGenerator.generate());
-        objBlackChessPlayerScoreRecord.setChessGameId(chessMove.getChessGameId());
-        objBlackChessPlayerScoreRecord.setChessPlayerId(objChessGame.getBlackPlayId());
+            // 正确获取棋手信息 - 使用查询而不是直接getById
+            QueryWrapper<ChessPlayer> blackPlayerQuery = new QueryWrapper<>();
+            blackPlayerQuery.eq("chess_game_id", chessMove.getChessGameId());
+            blackPlayerQuery.eq("user_id", objChessGame.getBlackPlayId());
+            ChessPlayer objBlackChessPlayer = chessPlayerService.getOne(blackPlayerQuery);
 
-        ChessPlayerScoreRecord objWhiteChessPlayerScoreRecord = new ChessPlayerScoreRecord();
-        objWhiteChessPlayerScoreRecord.setId(UUIDGenerator.generate());
-        objWhiteChessPlayerScoreRecord.setChessGameId(chessMove.getChessGameId());
-        objWhiteChessPlayerScoreRecord.setChessPlayerId(objChessGame.getWhitePlayId());
-        if (chessMove.getPiecesType() == 1) {
-            // 黑赢
-            objBlackScore.setScore(objBlackScore.getScore() + 30);
-            objBlackChessPlayerScoreRecord.setScore(30);
-            objWhiteScore.setScore((objWhiteScore.getScore() - 30) > 0 ? (objWhiteScore.getScore() - 30) : 0);
-            objWhiteChessPlayerScoreRecord.setScore(-30);
-        } else {
-            // 白赢
-            objWhiteScore.setScore(objWhiteScore.getScore() + 30);
-            objWhiteChessPlayerScoreRecord.setScore(30);
-            objBlackScore.setScore((objBlackScore.getScore() - 30) > 0 ? (objBlackScore.getScore() - 30) : 0);
-            objBlackChessPlayerScoreRecord.setScore(-30);
+            QueryWrapper<ChessPlayer> whitePlayerQuery = new QueryWrapper<>();
+            whitePlayerQuery.eq("chess_game_id", chessMove.getChessGameId());
+            whitePlayerQuery.eq("user_id", objChessGame.getWhitePlayId());
+            ChessPlayer objWhiteChessPlayer = chessPlayerService.getOne(whitePlayerQuery);
+
+            // 添加安全检查
+            if (objBlackChessPlayer == null || objWhiteChessPlayer == null) {
+                log.error("游戏结束处理失败：未找到玩家信息，黑方ID: {}, 白方ID: {}",
+                        objChessGame.getBlackPlayId(), objChessGame.getWhitePlayId());
+                return;
+            }
+
+            // 获取玩家分数
+            QueryWrapper<ChessPlayerScore> blackScoreQuery = new QueryWrapper<>();
+            blackScoreQuery.eq("user_id", objBlackChessPlayer.getUserId());
+            // 添加false参数，表示找到多个结果时不抛出异常，返回第一个结果
+            ChessPlayerScore objBlackScore = chessPlayerScoreService.getOne(blackScoreQuery, false);
+
+            QueryWrapper<ChessPlayerScore> whiteScoreQuery = new QueryWrapper<>();
+            whiteScoreQuery.eq("user_id", objWhiteChessPlayer.getUserId());
+            // 添加false参数，表示找到多个结果时不抛出异常，返回第一个结果
+            ChessPlayerScore objWhiteScore = chessPlayerScoreService.getOne(whiteScoreQuery, false);
+
+            // 安全检查分数记录
+            if (objBlackScore == null || objWhiteScore == null) {
+                log.warn("未找到玩家分数记录，将创建新记录");
+                if (objBlackScore == null) {
+                    objBlackScore = new ChessPlayerScore();
+                    objBlackScore.setId(UUIDGenerator.generate());
+                    objBlackScore.setUserId(objBlackChessPlayer.getUserId());
+                    objBlackScore.setUserAccount(objBlackChessPlayer.getUserAccount());
+                    objBlackScore.setScore(0);
+                    objBlackScore.setDelFlag(0);
+                }
+
+                if (objWhiteScore == null) {
+                    objWhiteScore = new ChessPlayerScore();
+                    objWhiteScore.setId(UUIDGenerator.generate());
+                    objWhiteScore.setUserId(objWhiteChessPlayer.getUserId());
+                    objWhiteScore.setUserAccount(objWhiteChessPlayer.getUserAccount());
+                    objWhiteScore.setScore(0);
+                    objWhiteScore.setDelFlag(0);
+                }
+            }
+
+            // 创建分数变更记录
+            ChessPlayerScoreRecord objBlackChessPlayerScoreRecord = new ChessPlayerScoreRecord();
+            objBlackChessPlayerScoreRecord.setId(UUIDGenerator.generate());
+            objBlackChessPlayerScoreRecord.setChessGameId(chessMove.getChessGameId());
+            objBlackChessPlayerScoreRecord.setChessPlayerId(objBlackChessPlayer.getId());
+
+            ChessPlayerScoreRecord objWhiteChessPlayerScoreRecord = new ChessPlayerScoreRecord();
+            objWhiteChessPlayerScoreRecord.setId(UUIDGenerator.generate());
+            objWhiteChessPlayerScoreRecord.setChessGameId(chessMove.getChessGameId());
+            objWhiteChessPlayerScoreRecord.setChessPlayerId(objWhiteChessPlayer.getId());
+
+            // 更新分数（黑方胜利或白方胜利）
+            String winnerSide;
+            if (chessMove.getPiecesType() == 1) {
+                // 黑方胜利
+                objBlackScore.setScore(objBlackScore.getScore() + 30);
+                objBlackChessPlayerScoreRecord.setScore(30);
+                objWhiteScore.setScore((objWhiteScore.getScore() - 30) > 0 ? (objWhiteScore.getScore() - 30) : 0);
+                objWhiteChessPlayerScoreRecord.setScore(-30);
+                winnerSide = "黑方";
+            } else {
+                // 白方胜利
+                objWhiteScore.setScore(objWhiteScore.getScore() + 30);
+                objWhiteChessPlayerScoreRecord.setScore(30);
+                objBlackScore.setScore((objBlackScore.getScore() - 30) > 0 ? (objBlackScore.getScore() - 30) : 0);
+                objBlackChessPlayerScoreRecord.setScore(-30);
+                winnerSide = "白方";
+            }
+
+            // 保存分数记录
+            chessPlayerScoreService.saveOrUpdate(objBlackScore);
+            chessPlayerScoreService.saveOrUpdate(objWhiteScore);
+            chessPlayerScoreRecordService.save(objBlackChessPlayerScoreRecord);
+            chessPlayerScoreRecordService.save(objWhiteChessPlayerScoreRecord);
+
+            log.info("游戏{}结束，{} 获胜", chessMove.getChessGameId(), winnerSide);
+
+            // 如果有注入SimpMessagingTemplate，发送游戏结束消息
+            if (messagingTemplate != null) {
+                try {
+                    Map<String, Object> gameOverMessage = new HashMap<>();
+                    gameOverMessage.put("type", "GAME_OVER");
+                    gameOverMessage.put("payload", new HashMap<String, Object>() {
+                        {
+                            put("winner", chessMove.getPiecesType() == 1 ? "BLACK" : "WHITE");
+                            put("reason", "CHECKMATE");
+                            put("gameId", chessMove.getChessGameId());
+                        }
+                    });
+
+                    messagingTemplate.convertAndSend("/topic/game/" + chessMove.getChessGameId(), gameOverMessage);
+                    log.info("游戏结束消息已发送，游戏ID: {}, 获胜方: {}",
+                            chessMove.getChessGameId(), winnerSide);
+                } catch (Exception e) {
+                    log.error("发送游戏结束消息时出错: {}", e.getMessage());
+                }
+            }
+        } catch (Exception e) {
+            log.error("处理游戏结束时发生错误", e);
         }
-        chessPlayerScoreService.updateById(objBlackScore);
-        chessPlayerScoreService.updateById(objWhiteScore);
-
-        chessPlayerScoreRecordService.save(objBlackChessPlayerScoreRecord);
-        chessPlayerScoreRecordService.save(objWhiteChessPlayerScoreRecord);
-
     }
 
     @Transactional

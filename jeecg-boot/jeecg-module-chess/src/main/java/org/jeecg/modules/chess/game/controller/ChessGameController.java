@@ -19,6 +19,8 @@ import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.chess.game.entity.ChessGame;
 import org.jeecg.modules.chess.game.entity.ChessPieces;
 import org.jeecg.modules.chess.game.service.IChessGameService;
+import org.jeecg.modules.chess.move.entity.ChessMove;
+import org.jeecg.modules.chess.move.service.IChessMoveService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.util.Map;
 import java.util.HashMap;
@@ -63,6 +65,8 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	private SimpMessagingTemplate messagingTemplate;
 	@Autowired
 	private IChessGameService chessGameService;
+	@Autowired
+	private IChessMoveService chessMoveService;
 
 	/**
 	 * 游戏初始化
@@ -183,7 +187,8 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 			return Result.error("未能找到您可以进入的游戏。");
 		}
 
-		// log.info("用户 [账号:" + sysUser.getUsername() + ", ID:" + sysUser.getId() + "] 成功进入游戏，找到 " + lstResult.size() + " 个可进入的游戏局.");
+		// log.info("用户 [账号:" + sysUser.getUsername() + ", ID:" + sysUser.getId() + "]
+		// 成功进入游戏，找到 " + lstResult.size() + " 个可进入的游戏局.");
 
 		// 发送WebSocket通知
 		for (ChessGameBatchVO gameVO : lstResult) {
@@ -194,11 +199,12 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 				Map<String, String> payloadData = new HashMap<>();
 				payloadData.put("userId", sysUser.getId());
 				payloadData.put("username", sysUser.getUsername());
-                payloadData.put("gameId", gameId);
+				payloadData.put("gameId", gameId);
 				messagePayload.put("payload", payloadData);
 				String destination = "/topic/game/" + gameId;
 				messagingTemplate.convertAndSend(destination, messagePayload);
-				log.info("Sent PLAYER_JOINED notification to {} for game {} and user {}", destination, gameId, sysUser.getUsername());
+				log.info("Sent PLAYER_JOINED notification to {} for game {} and user {}", destination, gameId,
+						sysUser.getUsername());
 			}
 		}
 
@@ -340,6 +346,41 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	@RequestMapping(value = "/importExcel", method = RequestMethod.POST)
 	public Result<?> importExcel(HttpServletRequest request, HttpServletResponse response) {
 		return super.importExcel(request, response, ChessGame.class);
+	}
+
+	/**
+	 * 获取对局回放记录
+	 *
+	 * @param gameId 对局ID
+	 * @return 包含按时间顺序排列的行棋记录列表
+	 */
+	@AutoLog(value = "游戏-获取对局回放记录")
+	@Operation(summary = "游戏-获取对局回放记录")
+	@GetMapping(value = "/replay/{gameId}")
+	public Result<?> getGameReplayMoves(@PathVariable("gameId") String gameId) {
+		if (oConvertUtils.isEmpty(gameId)) {
+			return Result.error("对局ID不能为空");
+		}
+
+		// 校验gameId对应的游戏是否存在
+		ChessGame game = chessGameService.getById(gameId);
+		if (game == null) {
+			return Result.error("指定的对局不存在或已被删除");
+		}
+
+		// 根据gameId查询所有相关的行棋记录
+		QueryWrapper<ChessMove> queryWrapper = new QueryWrapper<>();
+		queryWrapper.eq("chess_game_id", gameId);
+		queryWrapper.eq("del_flag", 0); // 只查询未删除的记录
+		queryWrapper.orderByAsc("create_time"); // 确保按创建时间（即行棋顺序）升序排列
+
+		List<ChessMove> moves = chessMoveService.list(queryWrapper);
+
+		if (moves == null || moves.isEmpty()) {
+			return Result.OK("该对局没有行棋记录", new ArrayList<>());
+		}
+
+		return Result.OK("成功获取行棋记录", moves);
 	}
 
 }

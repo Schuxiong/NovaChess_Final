@@ -2,7 +2,7 @@ package org.jeecg.modules.chess.move.service.impl;
 
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.jeecg.modules.chess.move.entity.ChessMove;
-import org.jeecg.modules.chess.move.mapper.ChessMoveMapper;
+import org.jeecg.modules.chess.move.mapper.ChessMoveRecordMapper;
 import org.jeecg.modules.chess.move.service.IChessMoveService;
 import org.springframework.stereotype.Service;
 
@@ -12,7 +12,7 @@ import org.springframework.stereotype.Service;
  * @Date: 2025-05-11
  * @Version: V1.0
  */
-@Service
-public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveMapper, ChessMove> implements IChessMoveService {
+@Service("chessMoveServiceMoveImpl")
+public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveRecordMapper, ChessMove> implements IChessMoveService {
 
 }

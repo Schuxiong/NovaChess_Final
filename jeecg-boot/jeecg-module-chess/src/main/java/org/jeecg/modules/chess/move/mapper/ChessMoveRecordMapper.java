@@ -11,6 +11,6 @@ import org.jeecg.modules.chess.move.entity.ChessMove;
  * @Version: V1.0
  */
 @Mapper
-public interface ChessMoveMapper extends BaseMapper<ChessMove> {
+public interface ChessMoveRecordMapper extends BaseMapper<ChessMove> {
 
 }

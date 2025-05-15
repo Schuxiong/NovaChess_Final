@@ -1,0 +1,15 @@
+# Stockfish引擎的配置
+chess:
+  stockfish:
+    # 默认分析深度
+    defaultDepth: 16
+    # 默认分析时间（毫秒）
+    defaultTimeMs: 5000
+    # 分析时间限制（毫秒）
+    timeoutMs: 30000
+    # 多路线分析（MultiPV）的数量
+    multiPv: 3
+    # Stockfish可执行文件的完整路径
+    # 例如: C:/Program Files/Stockfish/stockfish.exe
+    # 如果为空，则尝试从PATH环境变量中查找"stockfish"或"stockfish.exe"
+    executablePath: D:\\stockfish\\stockfish.exe

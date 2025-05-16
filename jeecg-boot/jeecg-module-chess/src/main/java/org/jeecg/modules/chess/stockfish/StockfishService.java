@@ -68,10 +68,25 @@ public class StockfishService {
       log.info("初始化Stockfish引擎...");
       uci = new UCI(timeoutMs);
 
-      // 使用指定路径启动Stockfish
-      String stockfishFilePath = "D:\\stockfish\\stockfish.exe";
-      log.info("使用指定路径启动Stockfish: {}", stockfishFilePath);
-      uci.start(stockfishFilePath);
+      String stockfishExecutable = System.getenv("STOCKFISH_EXECUTABLE_PATH");
+
+      if (stockfishExecutable != null && !stockfishExecutable.trim().isEmpty()) {
+        log.info("从环境变量 STOCKFISH_EXECUTABLE_PATH 获取Stockfish路径: {}", stockfishExecutable);
+      } else if (stockfishPath != null && !stockfishPath.trim().isEmpty()) {
+        log.info("从配置文件 chess.stockfish.executablePath 获取Stockfish路径: {}", stockfishPath);
+        stockfishExecutable = stockfishPath;
+      } else {
+        log.info("环境变量和配置文件均未指定Stockfish路径，尝试从系统PATH中查找 'stockfish'");
+        // 当 stockfishExecutable 为 null 或空时，uci.start() 会尝试执行 'stockfish'
+        // 或者如果 uci.startStockfish() 存在并且是期望行为，也可以调用它
+      }
+
+      if (stockfishExecutable != null && !stockfishExecutable.trim().isEmpty()) {
+        uci.start(stockfishExecutable);
+      } else {
+        // 假设 uci.startStockfish() 会尝试从PATH查找 'stockfish'
+        uci.startStockfish();
+      }
 
       // 设置MultiPV选项（分析多条线路）
       uci.setOption("MultiPV", String.valueOf(multiPv));

@@ -102,7 +102,7 @@ spring:
     static-path-pattern: /**
     #Spring Boot 2.6+后映射匹配的默认策略已从AntPathMatcher更改为PathPatternParser,需要手动指定为ant-path-matcher
     pathmatch:
-      matching-strategy: ant_path_matcher
+      matching-strategy: ant-path-matcher
   resource:
     static-locations: classpath:/static/,classpath:/public/
   autoconfigure:
@@ -321,4 +321,7 @@ chess:
     # 多路线分析（MultiPV）的数量
     multiPv: 3
     # Stockfish可执行文件的完整路径
-    executablePath: D:\\stockfish\\stockfish.exe
+    # 优先从环境变量 STOCKFISH_EXECUTABLE_PATH 读取
+    # 如果环境变量未设置，则从此配置读取
+    # 如果此配置也为空，则尝试从系统PATH查找 'stockfish'
+    executablePath: ""

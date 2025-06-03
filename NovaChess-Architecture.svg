@@ -1,0 +1,206 @@
+<svg width="1200" height="800" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="frontendGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#45a049;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="backendGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="databaseGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF9800;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#F57C00;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="aiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#9C27B0;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#7B1FA2;stop-opacity:1" />
+    </linearGradient>
+    <!-- 箭头标记 -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="1200" height="800" fill="#f5f5f5" stroke="#ddd" stroke-width="2"/>
+  
+  <!-- 标题 -->
+  <text x="600" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">NovaChess 国际象棋对战和教学系统架构图</text>
+  
+  <!-- 前端层 -->
+  <g id="frontend-layer">
+    <rect x="50" y="70" width="1100" height="120" fill="url(#frontendGradient)" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="600" y="95" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">前端层 (NovaChess-App)</text>
+    
+    <!-- 前端组件 -->
+    <rect x="80" y="110" width="140" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="150" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">用户界面</text>
+    <text x="150" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">登录/注册</text>
+    <text x="150" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">个人中心</text>
+    
+    <rect x="240" y="110" width="140" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="310" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">棋盘组件</text>
+    <text x="310" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">ChessBoard.vue</text>
+    <text x="310" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">实时对战</text>
+    
+    <rect x="400" y="110" width="140" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="470" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">游戏功能</text>
+    <text x="470" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">匹配/复盘</text>
+    <text x="470" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">人机对战</text>
+    
+    <rect x="560" y="110" width="140" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="630" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">学习模块</text>
+    <text x="630" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">课程/战术</text>
+    <text x="630" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">题库练习</text>
+    
+    <rect x="720" y="110" width="140" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="790" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">智能机器人</text>
+    <text x="790" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">前端AI集成</text>
+    <text x="790" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">多模型支持</text>
+    
+    <rect x="880" y="110" width="140" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="950" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">通信层</text>
+    <text x="950" y="145" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">WebSocket</text>
+    <text x="950" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">STOMP协议</text>
+  </g>
+  
+  <!-- 网关层 -->
+  <g id="gateway-layer">
+    <rect x="450" y="220" width="300" height="50" fill="#607D8B" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="600" y="240" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="white">API网关层</text>
+    <text x="600" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">JeecgBoot Gateway + 路由转发 + 认证鉴权</text>
+  </g>
+  
+  <!-- 后端服务层 -->
+  <g id="backend-layer">
+    <rect x="50" y="300" width="1100" height="200" fill="url(#backendGradient)" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="600" y="325" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">后端服务层 (JeecgBoot Framework)</text>
+    
+    <!-- 系统模块 -->
+    <rect x="80" y="340" width="200" height="140" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="180" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">系统管理模块</text>
+    <text x="180" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">jeecg-system-biz</text>
+    <text x="100" y="395" font-family="Arial, sans-serif" font-size="10" fill="#666">• 用户管理</text>
+    <text x="100" y="410" font-family="Arial, sans-serif" font-size="10" fill="#666">• 权限控制</text>
+    <text x="100" y="425" font-family="Arial, sans-serif" font-size="10" fill="#666">• 系统配置</text>
+    <text x="100" y="440" font-family="Arial, sans-serif" font-size="10" fill="#666">• 日志管理</text>
+    <text x="100" y="455" font-family="Arial, sans-serif" font-size="10" fill="#666">• 数据字典</text>
+    
+    <!-- 象棋核心模块 -->
+    <rect x="300" y="340" width="250" height="140" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="425" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">象棋核心模块</text>
+    <text x="425" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">jeecg-module-chess</text>
+    <text x="320" y="395" font-family="Arial, sans-serif" font-size="10" fill="#666">• 游戏管理 (ChessGameController)</text>
+    <text x="320" y="410" font-family="Arial, sans-serif" font-size="10" fill="#666">• 走棋控制 (ChessMoveController)</text>
+    <text x="320" y="425" font-family="Arial, sans-serif" font-size="10" fill="#666">• 匹配系统 (PairController)</text>
+    <text x="320" y="440" font-family="Arial, sans-serif" font-size="10" fill="#666">• 积分系统 (ScoreController)</text>
+    <text x="320" y="455" font-family="Arial, sans-serif" font-size="10" fill="#666">• 课程管理 (CourseController)</text>
+    
+    <!-- WebSocket服务 -->
+    <rect x="570" y="340" width="200" height="140" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="670" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">实时通信服务</text>
+    <text x="670" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">WebSocket + STOMP</text>
+    <text x="590" y="395" font-family="Arial, sans-serif" font-size="10" fill="#666">• WebChessSocketConfig</text>
+    <text x="590" y="410" font-family="Arial, sans-serif" font-size="10" fill="#666">• ChessMoveWebsocketController</text>
+    <text x="590" y="425" font-family="Arial, sans-serif" font-size="10" fill="#666">• 实时走棋广播</text>
+    <text x="590" y="440" font-family="Arial, sans-serif" font-size="10" fill="#666">• 游戏状态同步</text>
+    <text x="590" y="455" font-family="Arial, sans-serif" font-size="10" fill="#666">• 聊天消息推送</text>
+    
+    <!-- AI引擎服务 -->
+    <rect x="790" y="340" width="200" height="140" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="890" y="360" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">AI引擎服务</text>
+    <text x="890" y="375" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#666">Stockfish + LLM Integration</text>
+    <text x="810" y="395" font-family="Arial, sans-serif" font-size="10" fill="#666">• StockfishService (后端)</text>
+    <text x="810" y="410" font-family="Arial, sans-serif" font-size="10" fill="#666">• DeepSeek/Kimi API (前端)</text>
+    <text x="810" y="425" font-family="Arial, sans-serif" font-size="10" fill="#666">• 局面分析与评估</text>
+    <text x="810" y="440" font-family="Arial, sans-serif" font-size="10" fill="#666">• 智能走法推荐</text>
+    <text x="810" y="455" font-family="Arial, sans-serif" font-size="10" fill="#666">• 多难度AI对手</text>
+  </g>
+  
+  <!-- 数据层 -->
+  <g id="data-layer">
+    <rect x="50" y="530" width="1100" height="120" fill="url(#databaseGradient)" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="600" y="555" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">数据持久层</text>
+    
+    <!-- 数据库表 -->
+    <rect x="80" y="570" width="150" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="155" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">用户数据</text>
+    <text x="155" y="605" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">sys_user</text>
+    <text x="155" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_player</text>
+    
+    <rect x="250" y="570" width="150" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="325" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">游戏数据</text>
+    <text x="325" y="605" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_game</text>
+    <text x="325" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_move</text>
+    
+    <rect x="420" y="570" width="150" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="495" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">积分排名</text>
+    <text x="495" y="605" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_player_score</text>
+    <text x="495" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_statistics</text>
+    
+    <rect x="590" y="570" width="150" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="665" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">课程数据</text>
+    <text x="665" y="605" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_course</text>
+    <text x="665" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_lesson</text>
+    
+    <rect x="760" y="570" width="150" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="835" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">匹配数据</text>
+    <text x="835" y="605" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_pair</text>
+    <text x="835" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">chess_invitation</text>
+    
+    <rect x="930" y="570" width="150" height="60" fill="white" stroke="#333" stroke-width="1" rx="5"/>
+    <text x="1005" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">系统配置</text>
+    <text x="1005" y="605" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">sys_config</text>
+    <text x="1005" y="615" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">sys_log</text>
+  </g>
+  
+  <!-- 外部服务 -->
+  <g id="external-services">
+    <rect x="50" y="680" width="200" height="80" fill="url(#aiGradient)" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="150" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">传统AI引擎</text>
+    <text x="150" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Stockfish Engine</text>
+    <text x="150" y="735" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">UCI Protocol</text>
+    
+    <rect x="270" y="680" width="200" height="80" fill="#673AB7" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="370" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">大语言模型</text>
+    <text x="370" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">DeepSeek API</text>
+    <text x="370" y="735" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Kimi API</text>
+    
+    <rect x="490" y="680" width="200" height="80" fill="#795548" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="590" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">数据库服务</text>
+    <text x="590" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">MySQL Database</text>
+    <text x="590" y="735" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">MyBatis-Plus ORM</text>
+    
+    <rect x="710" y="680" width="200" height="80" fill="#E91E63" stroke="#333" stroke-width="2" rx="10"/>
+    <text x="810" y="700" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">缓存服务</text>
+    <text x="810" y="720" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Redis Cache</text>
+    <text x="810" y="735" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="white">Session & 实时数据</text>
+  </g>
+  
+  <!-- 连接线 -->
+  <!-- 前端到网关 -->
+  <line x1="600" y1="190" x2="600" y2="220" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 网关到后端 -->
+  <line x1="600" y1="270" x2="600" y2="300" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 后端到数据层 -->
+  <line x1="425" y1="500" x2="425" y2="530" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="670" y1="500" x2="670" y2="530" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 后端到外部服务 -->
+  <line x1="150" y1="500" x2="150" y2="680" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="590" y1="500" x2="590" y2="680" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="810" y1="500" x2="810" y2="680" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 前端到大语言模型的连接 -->
+  <path d="M 790 170 Q 500 400 370 680" stroke="#673AB7" stroke-width="3" fill="none" stroke-dasharray="8,4"/>
+  <text x="550" y="350" font-family="Arial, sans-serif" font-size="12" fill="#673AB7" font-weight="bold">前端AI直连</text>
+  
+  <!-- WebSocket连接 -->
+  <path d="M 950 170 Q 1000 250 670 340" stroke="#FF5722" stroke-width="3" fill="none" stroke-dasharray="5,5"/>
+  <text x="850" y="220" font-family="Arial, sans-serif" font-size="12" fill="#FF5722" font-weight="bold">WebSocket实时连接</text>
+  
+
+</svg>

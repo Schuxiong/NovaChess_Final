@@ -1,5 +1,6 @@
 package org.jeecg.modules.chess.game.controller;
 
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.base.controller.JeecgController;
@@ -17,6 +18,7 @@ import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 
+import java.util.List;
 import java.util.Map;
 import java.util.HashMap;
 
@@ -157,6 +159,15 @@ public class ChessMoveWebsocketController extends JeecgController<ChessMove, ICh
                 log.info("使用afterMove=true标记获取最新游戏状态");
                 latestGameState = chessGameService.getChessGameChessPieces(gameId, chatMessage.getUserId(), params);
                 objChessMoveResponseVO.setLatestGameState(latestGameState);
+                
+                // 获取并设置走棋历史
+                QueryWrapper<ChessMove> moveHistoryQuery = new QueryWrapper<>();
+                moveHistoryQuery.eq("chess_game_id", gameId);
+                moveHistoryQuery.eq("del_flag", 0);
+                moveHistoryQuery.orderByAsc("create_time"); // 按创建时间升序排列
+                List<ChessMove> moveHistory = chessMoveService.list(moveHistoryQuery);
+                objChessMoveResponseVO.setMoveHistory(moveHistory);
+                log.info("WebSocket设置走棋历史，共{}条记录", moveHistory != null ? moveHistory.size() : 0);
             } catch (Exception fetchEx) {
                 log.error("Failed to fetch game state after move for game {}: {}", gameId, fetchEx.getMessage());
             }
@@ -174,6 +185,15 @@ public class ChessMoveWebsocketController extends JeecgController<ChessMove, ICh
                 log.info("错误处理中，使用afterMove=true标记获取游戏状态");
                 latestGameState = chessGameService.getChessGameChessPieces(gameId, chatMessage.getUserId(), params);
                 objChessMoveResponseVO.setLatestGameState(latestGameState);
+                
+                // 即使出错也获取并设置走棋历史
+                QueryWrapper<ChessMove> moveHistoryQuery = new QueryWrapper<>();
+                moveHistoryQuery.eq("chess_game_id", gameId);
+                moveHistoryQuery.eq("del_flag", 0);
+                moveHistoryQuery.orderByAsc("create_time"); // 按创建时间升序排列
+                List<ChessMove> moveHistory = chessMoveService.list(moveHistoryQuery);
+                objChessMoveResponseVO.setMoveHistory(moveHistory);
+                log.info("错误处理中设置走棋历史，共{}条记录", moveHistory != null ? moveHistory.size() : 0);
             } catch (Exception fetchEx) {
                 log.error("Failed to fetch game state after move error for game {}: {}", gameId, fetchEx.getMessage());
             }

@@ -46,6 +46,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.MultipartHttpServletRequest;
 import org.springframework.web.servlet.ModelAndView;
+import org.springframework.context.ApplicationEventPublisher;
+import org.jeecg.modules.system.event.UserRegisteredEvent;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -116,6 +118,9 @@ public class SysUserController {
 
     @Autowired
     private ISysDepartService sysDepartService;
+    
+    @Autowired
+    private ApplicationEventPublisher eventPublisher;
 
 	@Autowired
 	private ISysUserRoleService sysUserRoleService;
@@ -1033,6 +1038,10 @@ public class SysUserController {
 			user.setDelFlag(CommonConstant.DEL_FLAG_0);
 			user.setActivitiSync(CommonConstant.ACT_SYNC_1);
 			sysUserService.addUserWithRole(user,"");//默认临时角色 test
+			
+			// 发布用户注册事件，由chess模块监听并初始化积分
+			eventPublisher.publishEvent(new UserRegisteredEvent(this, user.getId(), username));
+			
 			result.success("注册成功");
 		} catch (Exception e) {
 			result.error500("注册失败");
@@ -1895,4 +1904,5 @@ public class SysUserController {
         result.setMessage("发送验证码成功！");
         return result;
     }
+    
 }

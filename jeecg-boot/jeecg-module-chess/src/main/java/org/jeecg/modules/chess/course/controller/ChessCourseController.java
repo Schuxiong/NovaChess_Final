@@ -11,12 +11,15 @@ import org.jeecg.common.aspect.annotation.AutoLog;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.modules.chess.course.entity.ChessCourse;
 import org.jeecg.modules.chess.course.service.IChessCourseService;
+import org.jeecg.modules.chess.course.vo.CourseRequestVO;
+import org.jeecg.modules.chess.course.vo.CourseResponseVO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.Arrays;
+import java.util.Map;
 
 @Slf4j
 @Tag(name="国际象棋课程")
@@ -51,29 +54,39 @@ public class ChessCourseController extends JeecgController<ChessCourse, IChessCo
 	/**
 	 * 添加
 	 *
-	 * @param chessCourse
+	 * @param courseRequestVO
 	 * @return
 	 */
 	@AutoLog(value = "国际象棋课程-添加")
 	@Operation(summary = "国际象棋课程-添加")
 	@PostMapping(value = "/add")
-	public Result<?> add(@RequestBody ChessCourse chessCourse) {
-		chessCourseService.save(chessCourse);
-		return Result.OK("添加成功！");
+	public Result<?> add(@RequestBody CourseRequestVO courseRequestVO) {
+		try {
+			String courseId = chessCourseService.createCourse(courseRequestVO);
+			return Result.OK("创建成功", Map.of("id", courseId));
+		} catch (Exception e) {
+			log.error("创建课程失败", e);
+			return Result.error("创建失败：" + e.getMessage());
+		}
 	}
 	
 	/**
 	 * 编辑
 	 *
-	 * @param chessCourse
+	 * @param courseRequestVO
 	 * @return
 	 */
 	@AutoLog(value = "国际象棋课程-编辑")
 	@Operation(summary = "国际象棋课程-编辑")
 	@RequestMapping(value = "/edit", method = {RequestMethod.PUT,RequestMethod.POST})
-	public Result<?> edit(@RequestBody ChessCourse chessCourse) {
-		chessCourseService.updateById(chessCourse);
-		return Result.OK("编辑成功!");
+	public Result<?> edit(@RequestBody CourseRequestVO courseRequestVO) {
+		try {
+			chessCourseService.updateCourse(courseRequestVO);
+			return Result.OK("编辑成功!");
+		} catch (Exception e) {
+			log.error("编辑课程失败", e);
+			return Result.error("编辑失败：" + e.getMessage());
+		}
 	}
 	
 	/**
@@ -114,8 +127,16 @@ public class ChessCourseController extends JeecgController<ChessCourse, IChessCo
 	@Operation(summary = "国际象棋课程-通过id查询")
 	@GetMapping(value = "/queryById")
 	public Result<?> queryById(@RequestParam(name="id",required=true) String id) {
-		ChessCourse chessCourse = chessCourseService.getById(id);
-		return Result.OK(chessCourse);
+		try {
+			CourseResponseVO courseResponse = chessCourseService.getCourseById(id);
+			if(courseResponse == null) {
+				return Result.error("未找到对应数据");
+			}
+			return Result.OK(courseResponse);
+		} catch (Exception e) {
+			log.error("查询课程失败", e);
+			return Result.error("查询失败：" + e.getMessage());
+		}
 	}
 
   /**

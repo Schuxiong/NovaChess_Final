@@ -48,9 +48,9 @@ public class ChessGame {
 	@Excel(name = "白色账号", width = 15)
     @Schema(description = "白色账号")
 	private java.lang.String whitePlayAccount;
-	/** 游戏状态。1:进行中2：结束 */
-	@Excel(name = "游戏状态。1:进行中2：结束", width = 15)
-    @Schema(description = "游戏状态。1:进行中2：结束")
+	/** 游戏状态。1:进行中 2:正常结束 3:黑方胜利 4:白方胜利 5:和棋 6:流局(超时) 7:黑方退出 8:白方退出 */
+	@Excel(name = "游戏状态。1:进行中 2:正常结束 3:黑方胜利 4:白方胜利 5:和棋 6:流局(超时) 7:黑方退出 8:白方退出", width = 15)
+    @Schema(description = "游戏状态。1:进行中 2:正常结束 3:黑方胜利 4:白方胜利 5:和棋 6:流局(超时) 7:黑方退出 8:白方退出")
 	private java.lang.Integer gameState;
 	/** 游戏类型，1:人人对赛 2：人机对赛3:天梯赛 */
 	@Excel(name = "游戏类型，1:人人对赛 2：人机对赛3:天梯赛", width = 15)

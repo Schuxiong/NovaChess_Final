@@ -3,6 +3,8 @@ package org.jeecg.modules.chess.game.vo;
 import lombok.Data;
 
 import java.io.Serializable;
+import java.util.List;
+import org.jeecg.modules.chess.game.entity.ChessMove;
 
 @Data
 public class ChessMoveResponseVO implements Serializable {
@@ -20,4 +22,7 @@ public class ChessMoveResponseVO implements Serializable {
 
     /** 最新的游戏状态 **/
     private ChessGameVO latestGameState;
+
+    /** 走棋记录列表 **/
+    private List<ChessMove> moveHistory;
 }

@@ -19,8 +19,11 @@ import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.chess.game.entity.ChessGame;
 import org.jeecg.modules.chess.game.entity.ChessPieces;
 import org.jeecg.modules.chess.game.service.IChessGameService;
-import org.jeecg.modules.chess.move.entity.ChessMove;
-import org.jeecg.modules.chess.move.service.IChessMoveService;
+import org.jeecg.modules.chess.game.vo.ChessGameWithScoreVO;
+import org.jeecg.modules.chess.game.entity.ChessMove;
+import org.jeecg.modules.chess.game.service.IChessMoveService;
+import org.jeecg.modules.chess.game.entity.ChessDrawRequest;
+import org.jeecg.modules.chess.game.service.IChessDrawRequestService;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import java.util.Map;
 import java.util.HashMap;
@@ -32,8 +35,12 @@ import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.system.base.controller.JeecgController;
 import org.jeecg.modules.chess.game.vo.ChessGameBatchVO;
 import org.jeecg.modules.chess.game.vo.ChessGameVO;
+import org.jeecg.modules.chess.game.vo.ChessGameReplayVO;
 import org.jeecg.modules.chess.game.vo.PlayerPairVO;
 import org.jeecg.modules.chess.score.entity.ChessPlayerScore;
+import org.jeecg.modules.chess.score.service.IChessPlayerScoreService;
+import org.jeecg.modules.system.entity.SysUser;
+import org.jeecg.modules.system.service.ISysUserService;
 import org.jeecgframework.poi.excel.ExcelImportUtil;
 import org.jeecgframework.poi.excel.def.NormalExcelConstants;
 import org.jeecgframework.poi.excel.entity.ExportParams;
@@ -67,6 +74,15 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	private IChessGameService chessGameService;
 	@Autowired
 	private IChessMoveService chessMoveService;
+
+	@Autowired
+	private ISysUserService sysUserService;
+
+	@Autowired
+	private IChessPlayerScoreService chessPlayerScoreService;
+
+	@Autowired
+	private IChessDrawRequestService chessDrawRequestService;
 
 	/**
 	 * 游戏初始化
@@ -251,7 +267,7 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 			HttpServletRequest req) {
 		QueryWrapper<ChessGame> queryWrapper = QueryGenerator.initQueryWrapper(chessGame, req.getParameterMap());
 		Page<ChessGame> page = new Page<ChessGame>(pageNo, pageSize);
-		IPage<ChessGame> pageList = chessGameService.page(page, queryWrapper);
+		IPage<ChessGameWithScoreVO> pageList = chessGameService.pageWithScore(page, queryWrapper);
 		return Result.OK(pageList);
 	}
 
@@ -383,4 +399,392 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 		return Result.OK("成功获取行棋记录", moves);
 	}
 
+	/**
+	 * 退出游戏
+	 *
+	 * @param gameId 游戏ID
+	 * @return
+	 */
+	@AutoLog(value = "游戏-退出游戏")
+	@Operation(summary = "游戏-退出游戏")
+	@PostMapping(value = "/quit/{gameId}")
+	public Result<?> quitGame(@PathVariable("gameId") String gameId) {
+		if (oConvertUtils.isEmpty(gameId)) {
+			return Result.error("游戏ID不能为空");
+		}
+
+		// 获取当前登录用户
+		LoginUser currentUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+		if (currentUser == null) {
+			return Result.error("用户未登录");
+		}
+
+		// 校验游戏是否存在
+		ChessGame game = chessGameService.getById(gameId);
+		if (game == null) {
+			return Result.error("指定的游戏不存在或已被删除");
+		}
+
+		// 检查游戏是否正在进行中
+		if (game.getGameState() != 1) {
+			return Result.error("游戏已结束，无法退出");
+		}
+
+		// 检查当前用户是否是游戏参与者
+		String currentUserId = currentUser.getId();
+		boolean isBlackPlayer = currentUserId.equals(game.getBlackPlayId());
+		boolean isWhitePlayer = currentUserId.equals(game.getWhitePlayId());
+
+		if (!isBlackPlayer && !isWhitePlayer) {
+			return Result.error("您不是该游戏的参与者");
+		}
+
+		// 更新游戏状态
+		int newGameState;
+		String quitMessage;
+		if (isBlackPlayer) {
+			newGameState = 7; // 黑方退出
+			quitMessage = "黑方退出游戏";
+		} else {
+			newGameState = 8; // 白方退出
+			quitMessage = "白方退出游戏";
+		}
+
+		game.setGameState(newGameState);
+		game.setUpdateTime(new Date());
+		chessGameService.updateById(game);
+
+		// 通过WebSocket通知对手
+		try {
+			Map<String, Object> message = new HashMap<>();
+			message.put("type", "game_quit");
+			message.put("gameId", gameId);
+			message.put("quitPlayer", isBlackPlayer ? "black" : "white");
+			message.put("message", quitMessage);
+			message.put("gameState", newGameState);
+
+			// 通知黑方
+			if (game.getBlackPlayAccount() != null) {
+				messagingTemplate.convertAndSendToUser(
+					game.getBlackPlayAccount(),
+					"/queue/game/" + gameId,
+					message
+				);
+			}
+
+			// 通知白方
+			if (game.getWhitePlayAccount() != null) {
+				messagingTemplate.convertAndSendToUser(
+					game.getWhitePlayAccount(),
+					"/queue/game/" + gameId,
+					message
+				);
+			}
+		} catch (Exception e) {
+			log.error("发送退出游戏通知失败：{}", e.getMessage(), e);
+		}
+
+		return Result.OK(quitMessage);
+	}
+
+	/**
+	 * 处理游戏超时流局
+	 *
+	 * @param gameId 游戏ID
+	 * @return
+	 */
+	@AutoLog(value = "游戏-处理超时流局")
+	@Operation(summary = "游戏-处理超时流局")
+	@PostMapping(value = "/timeout/{gameId}")
+	public Result<?> handleGameTimeout(@PathVariable("gameId") String gameId) {
+		if (oConvertUtils.isEmpty(gameId)) {
+			return Result.error("游戏ID不能为空");
+		}
+
+		// 校验游戏是否存在
+		ChessGame game = chessGameService.getById(gameId);
+		if (game == null) {
+			return Result.error("指定的游戏不存在或已被删除");
+		}
+
+		// 检查游戏是否正在进行中
+		if (game.getGameState() != 1) {
+			return Result.error("游戏已结束，无法处理超时");
+		}
+
+		// 更新游戏状态为流局(超时)
+		game.setGameState(6);
+		game.setUpdateTime(new Date());
+		chessGameService.updateById(game);
+
+		// 通过WebSocket通知双方玩家
+		try {
+			Map<String, Object> message = new HashMap<>();
+			message.put("type", "game_timeout");
+			message.put("gameId", gameId);
+			message.put("message", "游戏超时，流局");
+			message.put("gameState", 6);
+
+			// 通知黑方
+			if (game.getBlackPlayAccount() != null) {
+				messagingTemplate.convertAndSendToUser(
+					game.getBlackPlayAccount(),
+					"/queue/game/" + gameId,
+					message
+				);
+			}
+
+			// 通知白方
+			if (game.getWhitePlayAccount() != null) {
+				messagingTemplate.convertAndSendToUser(
+					game.getWhitePlayAccount(),
+					"/queue/game/" + gameId,
+					message
+				);
+			}
+		} catch (Exception e) {
+			log.error("发送游戏超时通知失败：{}", e.getMessage(), e);
+		}
+
+		return Result.OK("游戏已标记为超时流局");
+	}
+
+	/**
+	 * 获取对局回放完整信息
+	 *
+	 * @param gameId 对局ID
+	 * @return 对局回放完整数据
+	 */
+	@AutoLog(value = "获取对局回放完整信息")
+	@Operation(summary = "获取对局回放完整信息")
+	@GetMapping(value = "/replay/complete/{gameId}")
+	public Result<ChessGameReplayVO> getGameReplay(@PathVariable("gameId") String gameId) {
+		try {
+			// 1. 获取对局基本信息
+			ChessGame game = chessGameService.getById(gameId);
+			if (game == null) {
+				return Result.error("对局不存在");
+			}
+
+			// 2. 创建回放VO对象
+			ChessGameReplayVO replayVO = new ChessGameReplayVO();
+			replayVO.setGameInfo(game);
+
+			// 3. 获取黑方玩家信息
+			if (game.getBlackPlayId() != null) {
+				SysUser blackUser = sysUserService.getById(game.getBlackPlayId());
+				if (blackUser != null) {
+					ChessGameReplayVO.PlayerInfo blackPlayer = new ChessGameReplayVO.PlayerInfo();
+					blackPlayer.setUserId(blackUser.getId());
+					blackPlayer.setUserAccount(blackUser.getUsername());
+					blackPlayer.setAvatar(blackUser.getAvatar());
+					blackPlayer.setRealname(blackUser.getRealname());
+					blackPlayer.setPiecesType(1); // 黑方
+
+					// 获取黑方积分
+					ChessPlayerScore blackScore = chessPlayerScoreService.lambdaQuery()
+							.eq(ChessPlayerScore::getUserId, blackUser.getId())
+							.one();
+					blackPlayer.setScore(blackScore != null ? blackScore.getScore() : 600);
+
+					replayVO.setBlackPlayer(blackPlayer);
+				}
+			}
+
+			// 4. 获取白方玩家信息
+			if (game.getWhitePlayId() != null) {
+				SysUser whiteUser = sysUserService.getById(game.getWhitePlayId());
+				if (whiteUser != null) {
+					ChessGameReplayVO.PlayerInfo whitePlayer = new ChessGameReplayVO.PlayerInfo();
+					whitePlayer.setUserId(whiteUser.getId());
+					whitePlayer.setUserAccount(whiteUser.getUsername());
+					whitePlayer.setAvatar(whiteUser.getAvatar());
+					whitePlayer.setRealname(whiteUser.getRealname());
+					whitePlayer.setPiecesType(2); // 白方
+
+					// 获取白方积分
+					ChessPlayerScore whiteScore = chessPlayerScoreService.lambdaQuery()
+							.eq(ChessPlayerScore::getUserId, whiteUser.getId())
+							.one();
+					whitePlayer.setScore(whiteScore != null ? whiteScore.getScore() : 600);
+
+					replayVO.setWhitePlayer(whitePlayer);
+				}
+			}
+
+			// 5. 获取对局步骤记录（按移动顺序排序）
+			List<ChessMove> moveHistory = chessMoveService.lambdaQuery()
+					.eq(ChessMove::getChessGameId, gameId)
+					.orderByAsc(ChessMove::getMoveSequence)
+					.list();
+			replayVO.setMoveHistory(moveHistory);
+
+			// 6. 计算对局统计信息
+			ChessGameReplayVO.GameStatistics statistics = new ChessGameReplayVO.GameStatistics();
+			statistics.setTotalMoves(moveHistory.size());
+
+			// 计算总用时和各方用时
+			int blackTotalTime = 0;
+			int whiteTotalTime = 0;
+			int blackMoveCount = 0;
+			int whiteMoveCount = 0;
+
+			for (ChessMove move : moveHistory) {
+				if (move.getMoveDurationSeconds() != null) {
+					// 根据移动序号判断是黑方还是白方（奇数序号为黑方，偶数序号为白方）
+					if (move.getMoveSequence() % 2 == 1) {
+						// 黑方
+						blackTotalTime += move.getMoveDurationSeconds();
+						blackMoveCount++;
+					} else {
+						// 白方
+						whiteTotalTime += move.getMoveDurationSeconds();
+						whiteMoveCount++;
+					}
+				}
+			}
+
+			statistics.setBlackTotalTime(blackTotalTime);
+			statistics.setWhiteTotalTime(whiteTotalTime);
+			statistics.setTotalDurationSeconds(blackTotalTime + whiteTotalTime);
+
+			// 计算平均用时
+			if (blackMoveCount > 0) {
+				statistics.setBlackAverageTimePerMove((double) blackTotalTime / blackMoveCount);
+			}
+			if (whiteMoveCount > 0) {
+				statistics.setWhiteAverageTimePerMove((double) whiteTotalTime / whiteMoveCount);
+			}
+
+			// 设置游戏结果
+			Integer gameState = game.getGameState();
+			if (gameState != null) {
+				switch (gameState) {
+					case 2:
+						statistics.setGameResultDescription("黑方胜利");
+						statistics.setWinner(1);
+						break;
+					case 3:
+						statistics.setGameResultDescription("白方胜利");
+						statistics.setWinner(2);
+						break;
+					case 4:
+						statistics.setGameResultDescription("和棋");
+						statistics.setWinner(0);
+						break;
+					case 6:
+						statistics.setGameResultDescription("超时流局");
+						statistics.setWinner(0);
+						break;
+					default:
+						statistics.setGameResultDescription("游戏进行中");
+						statistics.setWinner(-1);
+						break;
+				}
+			}
+
+			replayVO.setStatistics(statistics);
+
+			return Result.OK(replayVO);
+
+		} catch (Exception e) {
+			log.error("获取对局回放信息失败：{}", e.getMessage(), e);
+			return Result.error("获取对局回放信息失败：" + e.getMessage());
+		}
+	}
+
+	/**
+	 * 发起和棋请求
+	 *
+	 * @param gameId 游戏ID
+	 * @return
+	 */
+	@AutoLog(value = "发起和棋请求")
+	@Operation(summary = "发起和棋请求")
+	@PostMapping(value = "/draw/request/{gameId}")
+	public Result<?> requestDraw(@PathVariable("gameId") String gameId) {
+		try {
+			LoginUser currentUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+			String result = chessDrawRequestService.requestDraw(gameId, currentUser.getId());
+			
+			if ("和棋请求已发送".equals(result)) {
+				return Result.OK(result);
+			} else {
+				return Result.error(result);
+			}
+		} catch (Exception e) {
+			log.error("发起和棋请求失败：{}", e.getMessage(), e);
+			return Result.error("发起和棋请求失败：" + e.getMessage());
+		}
+	}
+
+	/**
+	 * 响应和棋请求
+	 *
+	 * @param gameId 游戏ID
+	 * @param accept 是否接受（true-接受，false-拒绝）
+	 * @return
+	 */
+	@AutoLog(value = "响应和棋请求")
+	@Operation(summary = "响应和棋请求")
+	@PostMapping(value = "/draw/respond/{gameId}")
+	public Result<?> respondDraw(@PathVariable("gameId") String gameId, @RequestParam("accept") boolean accept) {
+		try {
+			LoginUser currentUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+			String result = chessDrawRequestService.respondDraw(gameId, currentUser.getId(), accept);
+			
+			if (result.contains("已接受") || result.contains("已拒绝")) {
+				return Result.OK(result);
+			} else {
+				return Result.error(result);
+			}
+		} catch (Exception e) {
+			log.error("响应和棋请求失败：{}", e.getMessage(), e);
+			return Result.error("响应和棋请求失败：" + e.getMessage());
+		}
+	}
+
+	/**
+	 * 获取和棋请求状态
+	 *
+	 * @param gameId 游戏ID
+	 * @return
+	 */
+	@AutoLog(value = "获取和棋请求状态")
+	@Operation(summary = "获取和棋请求状态")
+	@GetMapping(value = "/draw/status/{gameId}")
+	public Result<?> getDrawStatus(@PathVariable("gameId") String gameId) {
+		try {
+			ChessDrawRequest drawRequest = chessDrawRequestService.getDrawStatus(gameId);
+			return Result.OK(drawRequest);
+		} catch (Exception e) {
+			log.error("获取和棋请求状态失败：{}", e.getMessage(), e);
+			return Result.error("获取和棋请求状态失败：" + e.getMessage());
+		}
+	}
+
+	/**
+	 * 取消和棋请求
+	 *
+	 * @param gameId 游戏ID
+	 * @return
+	 */
+	@AutoLog(value = "取消和棋请求")
+	@Operation(summary = "取消和棋请求")
+	@PostMapping(value = "/draw/cancel/{gameId}")
+	public Result<?> cancelDrawRequest(@PathVariable("gameId") String gameId) {
+		try {
+			LoginUser currentUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+			String result = chessDrawRequestService.cancelDrawRequest(gameId, currentUser.getId());
+			
+			if ("和棋请求已取消".equals(result)) {
+				return Result.OK(result);
+			} else {
+				return Result.error(result);
+			}
+		} catch (Exception e) {
+			log.error("取消和棋请求失败：{}", e.getMessage(), e);
+			return Result.error("取消和棋请求失败：" + e.getMessage());
+		}
+	}
 }

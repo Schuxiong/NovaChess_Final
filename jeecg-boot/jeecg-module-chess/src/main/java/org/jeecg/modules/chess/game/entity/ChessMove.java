@@ -100,4 +100,14 @@ public class ChessMove {
 	@Excel(name = "删除状态", width = 15)
 	@Schema(description = "删除状态")
 	private java.lang.Integer delFlag;
+	
+	/** 走棋顺序 */
+	@Excel(name = "走棋顺序", width = 15)
+	@Schema(description = "走棋顺序")
+	private java.lang.Integer moveSequence;
+	
+	/** 走棋耗时（秒） */
+	@Excel(name = "走棋耗时（秒）", width = 15)
+	@Schema(description = "走棋耗时（秒）")
+	private java.lang.Integer moveDurationSeconds;
 }

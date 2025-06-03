@@ -5,7 +5,11 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import org.jeecg.modules.chess.game.entity.ChessPieces;
 import org.jeecg.modules.chess.game.vo.ChessGameBatchVO;
 import org.jeecg.modules.chess.game.vo.ChessGameVO;
+import org.jeecg.modules.chess.game.vo.ChessGameWithScoreVO;
 import org.jeecg.modules.chess.game.vo.PlayerPairVO;
+import com.baomidou.mybatisplus.core.metadata.IPage;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import java.util.List;
 import java.util.Map;
@@ -61,4 +65,13 @@ public interface IChessGameService extends IService<ChessGame> {
      * @param pieces      棋子列表
      */
     void updateBoardCache(String chessGameId, List<ChessPieces> pieces);
+
+    /**
+     * 分页查询游戏列表（关联用户积分）
+     * 
+     * @param page 分页对象
+     * @param queryWrapper 查询条件
+     * @return 游戏列表（包含积分信息）
+     */
+    IPage<ChessGameWithScoreVO> pageWithScore(Page<ChessGame> page, QueryWrapper<ChessGame> queryWrapper);
 }

@@ -15,8 +15,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
-* 单体启动类
-*/
+ * 单体启动类
+ */
 @Slf4j
 @SpringBootApplication
 public class JeecgSystemApplication extends SpringBootServletInitializer {
@@ -31,9 +31,10 @@ public class JeecgSystemApplication extends SpringBootServletInitializer {
         Map<String, Object> defaultProperties = new HashMap<>();
         defaultProperties.put("management.health.elasticsearch.enabled", false);
         app.setDefaultProperties(defaultProperties);
-        log.info("[JEECG] Elasticsearch Health Check Enabled: false" );
-        
-        ConfigurableApplicationContext application = app.run(args);;
+        log.info("[JEECG] Elasticsearch Health Check Enabled: false");
+
+        ConfigurableApplicationContext application = app.run(args);
+        ;
         Environment env = application.getEnvironment();
         String ip = InetAddress.getLocalHost().getHostAddress();
         String port = env.getProperty("server.port");

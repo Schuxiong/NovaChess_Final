@@ -14,7 +14,9 @@ import org.jeecg.modules.chess.game.service.IChessPiecesService;
 import org.jeecg.modules.chess.game.service.IChessPlayerService;
 import org.jeecg.modules.chess.game.vo.ChessGameBatchVO;
 import org.jeecg.modules.chess.game.vo.ChessGameVO;
+import org.jeecg.modules.chess.game.vo.ChessGameWithScoreVO;
 import org.jeecg.modules.chess.game.vo.PlayerPairVO;
+import org.springframework.beans.BeanUtils;
 import org.jeecg.modules.chess.score.entity.ChessPlayerScore;
 import org.jeecg.modules.chess.score.service.IChessPlayerScoreService;
 import org.jeecg.modules.chess.util.Constant;
@@ -577,5 +579,43 @@ public class ChessGameServiceImpl extends ServiceImpl<ChessGameMapper, ChessGame
                 return errorResult;
             }
         }
+    }
+
+    @Override
+    public IPage<ChessGameWithScoreVO> pageWithScore(Page<ChessGame> page, QueryWrapper<ChessGame> queryWrapper) {
+        // 先查询游戏列表
+        IPage<ChessGame> gamePageList = this.page(page, queryWrapper);
+        
+        // 创建返回结果
+        Page<ChessGameWithScoreVO> resultPage = new Page<>(page.getCurrent(), page.getSize(), gamePageList.getTotal());
+        
+        List<ChessGameWithScoreVO> voList = new ArrayList<>();
+        
+        for (ChessGame game : gamePageList.getRecords()) {
+            ChessGameWithScoreVO vo = new ChessGameWithScoreVO();
+            // 复制基本属性
+            BeanUtils.copyProperties(game, vo);
+            
+            // 查询黑方积分
+            if (game.getBlackPlayId() != null) {
+                QueryWrapper<ChessPlayerScore> blackScoreQuery = new QueryWrapper<>();
+                blackScoreQuery.eq("user_id", game.getBlackPlayId());
+                ChessPlayerScore blackScore = chessPlayerScoreService.getOne(blackScoreQuery);
+                vo.setBlackPlayerScore(blackScore != null ? blackScore.getScore() : 600);
+            }
+            
+            // 查询白方积分
+            if (game.getWhitePlayId() != null) {
+                QueryWrapper<ChessPlayerScore> whiteScoreQuery = new QueryWrapper<>();
+                whiteScoreQuery.eq("user_id", game.getWhitePlayId());
+                ChessPlayerScore whiteScore = chessPlayerScoreService.getOne(whiteScoreQuery);
+                vo.setWhitePlayerScore(whiteScore != null ? whiteScore.getScore() : 600);
+            }
+            
+            voList.add(vo);
+        }
+        
+        resultPage.setRecords(voList);
+        return resultPage;
     }
 }

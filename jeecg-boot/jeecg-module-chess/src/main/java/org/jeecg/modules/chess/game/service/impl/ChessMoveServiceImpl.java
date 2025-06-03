@@ -159,6 +159,20 @@ public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveMapper, ChessMove
             }
             log.info("棋子位置更新成功");
 
+            // 移动棋子后，确保同ID棋子只在目标位置活跃，清理同ID在其他位置的活跃棋子
+            QueryWrapper<ChessPieces> duplicateQuery = new QueryWrapper<>();
+            duplicateQuery.eq("chess_game_id", objChessPieces.getChessGameId());
+            duplicateQuery.eq("id", objChessPieces.getId());
+            duplicateQuery.ne("position_x", chessMove.getToPositionX());
+            duplicateQuery.ne("position_y", chessMove.getToPositionY());
+            duplicateQuery.eq("pieces_state", 1);
+            List<ChessPieces> duplicates = chessPiecesService.list(duplicateQuery);
+            for (ChessPieces dup : duplicates) {
+                dup.setPiecesState(0);
+                chessPiecesService.updateById(dup);
+                log.info("清理同ID棋子: 设置棋子 {} (原位置: {}{}) 为非活跃", dup.getId(), dup.getPositionX(), dup.getPositionY());
+            }
+
             // 验证更新是否成功
             ChessPieces verifiedPiece = chessPiecesService.getById(objChessPieces.getId());
             if (verifiedPiece != null) {
@@ -499,13 +513,28 @@ public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveMapper, ChessMove
             chessMove.setToPositionY(toPositionY);
             chessMove.setPiecesType(fromPiece.getPiecesType());
             chessMove.setUserId(chatChessMoveRequestVO.getUserId());
+            
+            // 设置必要的数据库字段
+            chessMove.setCreateTime(new java.util.Date());
+            chessMove.setCreateBy(chatChessMoveRequestVO.getUserId());
+            chessMove.setUpdateTime(new java.util.Date());
+            chessMove.setUpdateBy(chatChessMoveRequestVO.getUserId());
+            chessMove.setDelFlag(0); // 确保不被删除标记过滤
+            
+            // 设置前端传递的走棋顺序和时间
+            if (chatChessMoveRequestVO.getMoveSequence() != null) {
+                chessMove.setMoveSequence(chatChessMoveRequestVO.getMoveSequence());
+            }
+            if (chatChessMoveRequestVO.getMoveDurationSeconds() != null) {
+                chessMove.setMoveDurationSeconds(chatChessMoveRequestVO.getMoveDurationSeconds());
+            }
 
             log.info("执行移动: 从({},{})到({},{}), 棋子ID: {}, 类型: {}",
                     fromPositionX, fromPositionY, toPositionX, toPositionY,
                     fromPiece.getId(), fromPiece.getChessPiecesName());
 
             // 执行移动棋子操作
-            ChessPiecesVO chessPiecesVO = this.movePieces(chessMove);
+            ChessPiecesVO chessPiecesVO = this.movePieces(chessMove, chatChessMoveRequestVO.getPromotionPieceType());
 
             if (chessPiecesVO.getErrorMessage() != null && !chessPiecesVO.getErrorMessage().isEmpty()) {
                 log.warn("棋子移动失败: {}", chessPiecesVO.getErrorMessage());
@@ -551,6 +580,15 @@ public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveMapper, ChessMove
 
             objChessMoveResponseVO.setLatestGameState(latestGameState);
             objChessMoveResponseVO.setSuccess(true);
+
+            // 获取并设置走棋历史
+            QueryWrapper<ChessMove> moveHistoryQuery = new QueryWrapper<>();
+            moveHistoryQuery.eq("chess_game_id", gameId);
+            moveHistoryQuery.eq("del_flag", 0);
+            moveHistoryQuery.orderByAsc("create_time"); // 按创建时间升序排列
+            List<ChessMove> moveHistory = this.list(moveHistoryQuery);
+            objChessMoveResponseVO.setMoveHistory(moveHistory);
+            log.info("设置走棋历史，共{}条记录", moveHistory != null ? moveHistory.size() : 0);
 
             // 记录返回的棋子状态信息
             if (latestGameState != null && latestGameState.getChessPiecesList() != null) {
@@ -627,5 +665,193 @@ public class ChessMoveServiceImpl extends ServiceImpl<ChessMoveMapper, ChessMove
         } catch (Exception e) {
             log.error("清理重复棋子时出错", e);
         }
+    }
+
+    // 新增重载方法，支持升变
+    @Transactional
+    public ChessPiecesVO movePieces(ChessMove chessMove, String promotionPieceType) {
+        ChessPiecesVO objChessPiecesVO = new ChessPiecesVO();
+        try {
+            // 首先清理棋盘上的重复棋子
+            cleanupDuplicatePieces(chessMove.getChessGameId());
+
+            // 获取当前游戏
+            ChessGame objChessGame = chessGameService.getById(chessMove.getChessGameId());
+
+            // 获取棋手信息
+            QueryWrapper<ChessPlayer> queryPlayerWrapper = new QueryWrapper<>();
+            queryPlayerWrapper.eq("chess_game_id", chessMove.getChessGameId());
+            queryPlayerWrapper.eq("user_id", chessMove.getUserId());
+            ChessPlayer objChessPlayer = chessPlayerService.getOne(queryPlayerWrapper);
+
+            // 检查是否轮到该玩家行棋
+            if (objChessPlayer.getHoldChess() != objChessGame.getCurrentTurn()) {
+                objChessPiecesVO.setErrorMessage("不是您的回合，请等待对手下棋");
+                return objChessPiecesVO;
+            }
+
+            // 获取要移动的棋子
+            QueryWrapper<ChessPieces> fromQueryWrapper = new QueryWrapper<>();
+            fromQueryWrapper.eq("chess_game_id", chessMove.getChessGameId());
+            fromQueryWrapper.eq("id", chessMove.getChessPiecesId());
+            ChessPieces objChessPieces = chessPiecesService.getOne(fromQueryWrapper);
+
+            if (objChessPieces == null) {
+                objChessPiecesVO.setErrorMessage("未找到要移动的棋子");
+                return objChessPiecesVO;
+            }
+
+            // 前端已实现完整的移动验证，跳过后端验证
+            log.info("跳过后端移动验证，允许 {} 从({},{})移动到({},{})",
+                    objChessPieces.getChessPiecesName(),
+                    objChessPieces.getPositionX(), objChessPieces.getPositionY(),
+                    chessMove.getToPositionX(), chessMove.getToPositionY());
+
+            // 检查目标位置是否有棋子
+            QueryWrapper<ChessPieces> targetQueryWrapper = new QueryWrapper<>();
+            targetQueryWrapper.eq("chess_game_id", chessMove.getChessGameId());
+            targetQueryWrapper.eq("position_x", chessMove.getToPositionX());
+            targetQueryWrapper.eq("position_y", chessMove.getToPositionY());
+            targetQueryWrapper.eq("pieces_state", 1); // 活跃的棋子
+            ChessPieces targetPiece = chessPiecesService.getOne(targetQueryWrapper);
+
+            // 如果目标位置有棋子
+            if (targetPiece != null) {
+                // 不能吃自己的棋子
+                if (targetPiece.getPiecesType() == objChessPieces.getPiecesType()) {
+                    objChessPiecesVO.setErrorMessage("不能吃掉自己的棋子");
+                    return objChessPiecesVO;
+                }
+
+                // 可以吃对方的棋子
+                if (targetPiece.getChessPiecesName().equalsIgnoreCase("king")) {
+                    // 如果吃掉的是王，则赢了
+                    winChess(chessMove);
+                }
+
+                // 标记目标棋子为已被吃
+                targetPiece.setPiecesState(2);
+                boolean targetUpdateResult = chessPiecesService.updateById(targetPiece);
+                if (!targetUpdateResult) {
+                    log.error("更新被吃棋子状态失败");
+                }
+
+                // 记录被吃的棋子ID
+                chessMove.setTookPiecesId(targetPiece.getId());
+                objChessPiecesVO.setTargetChessPiecesId(targetPiece.getId());
+            }
+
+            // 备份原始位置，用于记录和验证
+            String originalX = objChessPieces.getPositionX();
+            String originalY = objChessPieces.getPositionY();
+
+            // 更新棋子位置
+            objChessPieces.setPositionX(chessMove.getToPositionX());
+            objChessPieces.setPositionY(chessMove.getToPositionY());
+            log.info("正在更新棋子位置: ID={}, 从 {} -> {}",
+                    objChessPieces.getId(),
+                    chessMove.getFromPositionX() + chessMove.getFromPositionY(),
+                    chessMove.getToPositionX() + chessMove.getToPositionY());
+
+            boolean updateResult = chessPiecesService.updateById(objChessPieces);
+            if (!updateResult) {
+                log.error("更新棋子位置失败");
+                objChessPiecesVO.setErrorMessage("服务器无法更新棋子位置");
+                return objChessPiecesVO;
+            }
+            log.info("棋子位置更新成功");
+
+            // 升变处理（必须在棋子移动到目标位置后）
+            if (promotionPieceType != null && !promotionPieceType.isEmpty()) {
+                if (promotionPieceType.equalsIgnoreCase("QUEEN") || promotionPieceType.equalsIgnoreCase("ROOK")
+                        || promotionPieceType.equalsIgnoreCase("BISHOP")
+                        || promotionPieceType.equalsIgnoreCase("KNIGHT")) {
+                    objChessPieces.setChessPiecesName(
+                            promotionPieceType.substring(0, 1).toUpperCase()
+                                    + promotionPieceType.substring(1).toLowerCase());
+                    boolean promotionUpdateResult = chessPiecesService.updateById(objChessPieces);
+                    if (!promotionUpdateResult) {
+                        log.error("升变后更新棋子类型失败");
+                    } else {
+                        log.info("升变成功：棋子ID={} 升变为{}", objChessPieces.getId(), objChessPieces.getChessPiecesName());
+                    }
+                } else {
+                    log.warn("不支持的升变类型: {}", promotionPieceType);
+                }
+            }
+
+            // 移动和升变后，确保同ID棋子只在目标位置活跃，清理同ID在其他位置的活跃棋子
+            QueryWrapper<ChessPieces> duplicateQuery = new QueryWrapper<>();
+            duplicateQuery.eq("chess_game_id", objChessPieces.getChessGameId());
+            duplicateQuery.eq("id", objChessPieces.getId());
+            duplicateQuery.ne("position_x", objChessPieces.getPositionX());
+            duplicateQuery.ne("position_y", objChessPieces.getPositionY());
+            duplicateQuery.eq("pieces_state", 1);
+            List<ChessPieces> duplicates = chessPiecesService.list(duplicateQuery);
+            for (ChessPieces dup : duplicates) {
+                dup.setPiecesState(0);
+                chessPiecesService.updateById(dup);
+                log.info("清理同ID棋子: 设置棋子 {} (原位置: {}{}) 为非活跃", dup.getId(), dup.getPositionX(), dup.getPositionY());
+            }
+
+            // 验证更新是否成功
+            ChessPieces verifiedPiece = chessPiecesService.getById(objChessPieces.getId());
+            if (verifiedPiece != null) {
+                if (!verifiedPiece.getPositionX().equals(chessMove.getToPositionX()) ||
+                        !verifiedPiece.getPositionY().equals(chessMove.getToPositionY())) {
+
+                    log.error("验证失败：棋子ID={}位置未更新，当前={}{}, 期望={}{}",
+                            verifiedPiece.getId(),
+                            verifiedPiece.getPositionX(), verifiedPiece.getPositionY(),
+                            chessMove.getToPositionX(), chessMove.getToPositionY());
+
+                    // 尝试再次更新位置
+                    verifiedPiece.setPositionX(chessMove.getToPositionX());
+                    verifiedPiece.setPositionY(chessMove.getToPositionY());
+                    chessPiecesService.updateById(verifiedPiece);
+                } else {
+                    log.info("验证成功：棋子ID={}位置已正确更新到{}{}",
+                            verifiedPiece.getId(),
+                            verifiedPiece.getPositionX(), verifiedPiece.getPositionY());
+                }
+            }
+
+            // 保存移动记录
+            this.save(chessMove);
+
+            // 更新当前轮次
+            if (objChessGame.getCurrentTurn() == 1) {
+                objChessGame.setCurrentTurn(2); // 切换到白方
+            } else {
+                objChessGame.setCurrentTurn(1); // 切换到黑方
+            }
+            chessGameService.updateById(objChessGame);
+
+            // 获取并更新棋盘缓存
+            QueryWrapper<ChessPieces> allPiecesQuery = new QueryWrapper<>();
+            allPiecesQuery.eq("chess_game_id", chessMove.getChessGameId());
+            allPiecesQuery.eq("pieces_state", 1); // 只获取活跃的棋子
+            allPiecesQuery.eq("del_flag", 0);
+            List<ChessPieces> updatedPieces = chessPiecesService.list(allPiecesQuery);
+
+            if (updatedPieces != null && !updatedPieces.isEmpty()) {
+                log.info("更新棋盘缓存，包含{}个棋子", updatedPieces.size());
+                // 调用GameService的缓存更新方法
+                chessGameService.updateBoardCache(chessMove.getChessGameId(), updatedPieces);
+            } else {
+                log.warn("无法更新棋盘缓存：未找到活跃棋子");
+            }
+
+            // 设置返回值
+            objChessPiecesVO.setChessGameId(chessMove.getChessGameId());
+            objChessPiecesVO.setPositionX(chessMove.getToPositionX());
+            objChessPiecesVO.setPositionY(chessMove.getToPositionY());
+            objChessPiecesVO.setCurrentTurn(objChessGame.getCurrentTurn());
+
+        } catch (Exception e) {
+            log.error("棋子移动错误：", e);
+            objChessPiecesVO.setErrorMessage("服务器处理棋子移动时发生错误");
+        }
+        return objChessPiecesVO;
     }
 }

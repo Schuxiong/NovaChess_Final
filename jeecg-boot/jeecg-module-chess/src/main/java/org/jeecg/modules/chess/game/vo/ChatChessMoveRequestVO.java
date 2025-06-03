@@ -33,11 +33,24 @@ public class ChatChessMoveRequestVO implements Serializable {
     /** 升变选择，如果兵升变为其他棋子 **/
     private String promotionPieceType;
 
+    /** 走棋顺序 **/
+    private Integer moveSequence;
+
+    /** 走棋耗时（秒） **/
+    private Integer moveDurationSeconds;
+
+    /** 被吃棋子ID **/
+    private String tookPiecesId;
+
+    /** 是否升变 **/
+    private Boolean isPromotion;
+
     private ChatChessMoveRequestVO.MessageType type;
 
     public enum MessageType {
         CHAT,
         JOIN,
-        LEAVE
+        LEAVE,
+        MOVE
     }
 }

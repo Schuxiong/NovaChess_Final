@@ -98,32 +98,31 @@ public class ChessDrawRequestServiceImpl extends ServiceImpl<ChessDrawRequestMap
         
         this.save(drawRequest);
         
-        // 7. 通过WebSocket通知对方
+        // 7. 通过WebSocket通知双方
         try {
-            Map<String, Object> message = new HashMap<>();
-            message.put("type", "draw_request");
-            message.put("gameId", gameId);
-            message.put("requestUser", requestUser.getUsername());
-            message.put("message", requestUser.getUsername() + " 发起了和棋请求");
-            message.put("requestId", drawRequest.getId());
+            // 通知对方收到和棋请求
+            Map<String, Object> requestMessage = new HashMap<>();
+            requestMessage.put("type", "draw_request");
+            requestMessage.put("gameId", gameId);
+            requestMessage.put("requestUserId", requestUserId);
+            requestMessage.put("targetUserId", targetUserId);
+            requestMessage.put("requestUser", requestUser.getUsername());
+            requestMessage.put("message", requestUser.getUsername() + " 发起了和棋请求");
+            requestMessage.put("requestId", drawRequest.getId());
             
-            // 通知目标用户
-            if (targetUserAccount != null) {
-                messagingTemplate.convertAndSendToUser(
-                    targetUserAccount,
-                    "/queue/game/" + gameId,
-                    message
-                );
-            }
+            // 发送到游戏topic，所有订阅该游戏的用户都会收到
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, requestMessage);
+            log.info("和棋请求通知已发送到 /topic/game/{}: {}", gameId, requestMessage);
             
-            // 同时通知发起者确认请求已发送
-            message.put("type", "draw_request_sent");
-            message.put("message", "和棋请求已发送，等待对方响应");
-            messagingTemplate.convertAndSendToUser(
-                requestUser.getUsername(),
-                "/queue/game/" + gameId,
-                message
-            );
+            // 通知发起者确认请求已发送
+            Map<String, Object> sentMessage = new HashMap<>();
+            sentMessage.put("type", "draw_request_sent");
+            sentMessage.put("gameId", gameId);
+            sentMessage.put("message", "和棋请求已发送，等待对方响应");
+            sentMessage.put("requestId", drawRequest.getId());
+            
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, sentMessage);
+            log.info("和棋请求发送确认通知已发送到 /topic/game/{}: {}", gameId, sentMessage);
             
         } catch (Exception e) {
             log.error("发送和棋请求通知失败：{}", e.getMessage(), e);
@@ -197,21 +196,9 @@ public class ChessDrawRequestServiceImpl extends ServiceImpl<ChessDrawRequestMap
                 message.put("gameResult", "和棋");
             }
             
-            // 通知发起者
-            if (drawRequest.getRequestUserAccount() != null) {
-                messagingTemplate.convertAndSendToUser(
-                    drawRequest.getRequestUserAccount(),
-                    "/queue/game/" + gameId,
-                    message
-                );
-            }
-            
-            // 通知响应者
-            messagingTemplate.convertAndSendToUser(
-                responseUser.getUsername(),
-                "/queue/game/" + gameId,
-                message
-            );
+            // 发送到游戏topic，所有订阅该游戏的用户都会收到
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, message);
+            log.info("和棋响应通知已发送到 /topic/game/{}: {}", gameId, message);
             
         } catch (Exception e) {
             log.error("发送和棋响应通知失败：{}", e.getMessage(), e);
@@ -253,20 +240,16 @@ public class ChessDrawRequestServiceImpl extends ServiceImpl<ChessDrawRequestMap
         drawRequest.setUpdateBy(userId);
         this.updateById(drawRequest);
         
-        // 通过WebSocket通知对方
+        // 通过WebSocket通知双方
         try {
             Map<String, Object> message = new HashMap<>();
             message.put("type", "draw_request_cancelled");
             message.put("gameId", gameId);
             message.put("message", drawRequest.getRequestUserAccount() + " 取消了和棋请求");
             
-            if (drawRequest.getTargetUserAccount() != null) {
-                messagingTemplate.convertAndSendToUser(
-                    drawRequest.getTargetUserAccount(),
-                    "/queue/game/" + gameId,
-                    message
-                );
-            }
+            // 发送到游戏topic，所有订阅该游戏的用户都会收到
+            messagingTemplate.convertAndSend("/topic/game/" + gameId, message);
+            log.info("和棋请求取消通知已发送到 /topic/game/{}: {}", gameId, message);
             
         } catch (Exception e) {
             log.error("发送和棋请求取消通知失败：{}", e.getMessage(), e);

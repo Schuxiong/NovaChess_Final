@@ -3,7 +3,9 @@ package org.jeecg.modules.chess.game.controller;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import lombok.extern.slf4j.Slf4j;
 import org.jeecg.common.api.vo.Result;
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.common.system.base.controller.JeecgController;
+import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.modules.chess.game.entity.ChessGame;
 import org.jeecg.modules.chess.game.entity.ChessMove;
 import org.jeecg.modules.chess.game.service.IChessGameService;
@@ -34,6 +36,9 @@ public class ChessMoveWebsocketController extends JeecgController<ChessMove, ICh
 
     @Autowired
     private SimpMessagingTemplate messagingTemplate;
+
+    @Autowired
+    private ISysBaseAPI sysBaseApi;
 
     /**
      * 处理游戏加入请求
@@ -66,6 +71,10 @@ public class ChessMoveWebsocketController extends JeecgController<ChessMove, ICh
             // 向玩家发送棋盘状态
             messagingTemplate.convertAndSend("/topic/chessboard", Result.ok(gameVO));
 
+            // 获取加入玩家的用户信息，包括头像
+            LoginUser joinUser = sysBaseApi.getUserById(chatMessage.getUserId());
+            String userAvatar = joinUser != null ? joinUser.getAvatar() : null;
+
             // 向所有玩家广播有玩家加入的消息
             Map<String, Object> joinMessage = new HashMap<>();
             joinMessage.put("type", "PLAYER_JOIN");
@@ -73,6 +82,7 @@ public class ChessMoveWebsocketController extends JeecgController<ChessMove, ICh
                 {
                     put("userId", chatMessage.getUserId());
                     put("username", chatMessage.getUsername());
+                    put("avatar", userAvatar);
                 }
             });
 

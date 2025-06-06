@@ -1,0 +1,574 @@
+<svg width="1400" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 渐变定义 -->
+    <linearGradient id="headerGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#2E86AB;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#A23B72;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="llmGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF6B6B;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#4ECDC4;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="chessGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#45B7D1;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#96CEB4;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="apiGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FFEAA7;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#FAB1A0;stop-opacity:1" />
+    </linearGradient>
+    
+    <linearGradient id="robotGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#A29BFE;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#6C5CE7;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 阴影滤镜 -->
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="3" dy="3" stdDeviation="3" flood-color="rgba(0,0,0,0.3)"/>
+    </filter>
+    
+    <!-- 发光效果 -->
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge> 
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/> 
+      </feMerge>
+    </filter>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="1400" height="1000" fill="#f8f9fa"/>
+  
+  <!-- 标题区域 -->
+  <rect x="0" y="0" width="1400" height="80" fill="url(#headerGradient)" filter="url(#shadow)"/>
+  <text x="700" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="28" font-weight="bold" fill="white">
+    NovaChess 大语言模型在国际象棋中的应用
+  </text>
+  
+  <!-- 主要架构区域 -->
+  
+  <!-- 1. 大语言模型核心 -->
+  <g transform="translate(50, 120)">
+    <rect x="0" y="0" width="300" height="200" rx="15" fill="url(#llmGradient)" filter="url(#shadow)"/>
+    <text x="150" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">
+      大语言模型核心
+    </text>
+    
+    <!-- DeepSeek模型 -->
+    <rect x="20" y="50" width="120" height="60" rx="8" fill="rgba(255,255,255,0.9)" stroke="#FF6B6B" stroke-width="2"/>
+    <text x="80" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">
+      DeepSeek V3
+    </text>
+    <text x="80" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+      deepseek-chat
+    </text>
+    <text x="80" y="98" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+      主力模型
+    </text>
+    
+    <!-- DeepSeek R1模型 -->
+    <rect x="160" y="50" width="120" height="60" rx="8" fill="rgba(255,255,255,0.9)" stroke="#4ECDC4" stroke-width="2"/>
+    <text x="220" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">
+      DeepSeek R1
+    </text>
+    <text x="220" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+      deepseek-reasoner
+    </text>
+    <text x="220" y="98" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+      推理模型
+    </text>
+    
+    <!-- Kimi模型 -->
+    <rect x="90" y="130" width="120" height="60" rx="8" fill="rgba(255,255,255,0.9)" stroke="#A29BFE" stroke-width="2"/>
+    <text x="150" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">
+      Kimi
+    </text>
+    <text x="150" y="165" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+      moonshot-v1-8k
+    </text>
+    <text x="150" y="178" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#666">
+      备用模型
+    </text>
+  </g>
+  
+  <!-- 2. AI机器人系统 -->
+  <g transform="translate(400, 120)">
+    <rect x="0" y="0" width="350" height="200" rx="15" fill="url(#robotGradient)" filter="url(#shadow)"/>
+    <text x="175" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">
+      AI机器人系统
+    </text>
+    
+    <!-- 机器人类型 -->
+    <rect x="20" y="50" width="100" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#6C5CE7" stroke-width="1"/>
+    <text x="70" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      象棋大师
+    </text>
+    <text x="70" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      防守型
+    </text>
+    
+    <rect x="130" y="50" width="100" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#6C5CE7" stroke-width="1"/>
+    <text x="180" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      象棋教授
+    </text>
+    <text x="180" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      平衡型
+    </text>
+    
+    <rect x="240" y="50" width="100" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#6C5CE7" stroke-width="1"/>
+    <text x="290" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      地区冠军
+    </text>
+    <text x="290" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      进攻型
+    </text>
+    
+    <rect x="75" y="100" width="100" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#6C5CE7" stroke-width="1"/>
+    <text x="125" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      特级大师
+    </text>
+    <text x="125" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      全能型
+    </text>
+    
+    <rect x="185" y="100" width="100" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#6C5CE7" stroke-width="1"/>
+    <text x="235" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      传奇棋手
+    </text>
+    <text x="235" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      创新型
+    </text>
+    
+    <!-- 思考深度设置 -->
+    <rect x="20" y="150" width="310" height="35" rx="5" fill="rgba(255,255,255,0.8)" stroke="#A29BFE" stroke-width="1"/>
+    <text x="25" y="165" font-family="Arial, sans-serif" font-size="10" fill="#333">
+      思考深度: 浅显 → 普通 → 深入 → 精细 → 极致
+    </text>
+    <text x="25" y="178" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      温度参数: 0.7 (创造性/随机性调节)
+    </text>
+  </g>
+  
+  <!-- 3. API集成层 -->
+  <g transform="translate(800, 120)">
+    <rect x="0" y="0" width="280" height="200" rx="15" fill="url(#apiGradient)" filter="url(#shadow)"/>
+    <text x="140" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">
+      API集成层
+    </text>
+    
+    <!-- API配置 -->
+    <rect x="20" y="50" width="240" height="30" rx="5" fill="rgba(255,255,255,0.9)" stroke="#FFEAA7" stroke-width="1"/>
+    <text x="30" y="65" font-family="Arial, sans-serif" font-size="10" fill="#333">
+      DeepSeek API: api.deepseek.com/v1/chat/completions
+    </text>
+    <text x="30" y="75" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      认证: Bearer Token
+    </text>
+    
+    <rect x="20" y="90" width="240" height="30" rx="5" fill="rgba(255,255,255,0.9)" stroke="#FFEAA7" stroke-width="1"/>
+    <text x="30" y="105" font-family="Arial, sans-serif" font-size="10" fill="#333">
+      Kimi API: api.moonshot.cn/v1/chat/completions
+    </text>
+    <text x="30" y="115" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      备用接口
+    </text>
+    
+    <!-- 可用性检测 -->
+    <rect x="20" y="130" width="240" height="50" rx="5" fill="rgba(255,255,255,0.9)" stroke="#FAB1A0" stroke-width="1"/>
+    <text x="30" y="145" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      智能切换机制
+    </text>
+    <text x="30" y="158" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 自动检测API可用性
+    </text>
+    <text x="30" y="170" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 失败时自动切换备用模型
+    </text>
+  </g>
+  
+  <!-- 4. 国际象棋应用层 -->
+  <g transform="translate(1120, 120)">
+    <rect x="0" y="0" width="250" height="200" rx="15" fill="url(#chessGradient)" filter="url(#shadow)"/>
+    <text x="125" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">
+      国际象棋应用
+    </text>
+    
+    <!-- 棋盘表示 -->
+    <g transform="translate(20, 50)">
+      <!-- 简化的棋盘 -->
+      <rect x="0" y="0" width="80" height="80" fill="#f0d9b5" stroke="#b58863" stroke-width="1"/>
+      <rect x="10" y="10" width="10" height="10" fill="#b58863"/>
+      <rect x="30" y="10" width="10" height="10" fill="#b58863"/>
+      <rect x="50" y="10" width="10" height="10" fill="#b58863"/>
+      <rect x="70" y="10" width="10" height="10" fill="#b58863"/>
+      <rect x="20" y="20" width="10" height="10" fill="#b58863"/>
+      <rect x="40" y="20" width="10" height="10" fill="#b58863"/>
+      <rect x="60" y="20" width="10" height="10" fill="#b58863"/>
+      
+      <!-- 棋子符号 -->
+      <text x="15" y="18" font-family="Arial, sans-serif" font-size="8" fill="#000">♜</text>
+      <text x="25" y="18" font-family="Arial, sans-serif" font-size="8" fill="#000">♞</text>
+      <text x="35" y="18" font-family="Arial, sans-serif" font-size="8" fill="#000">♝</text>
+      <text x="45" y="18" font-family="Arial, sans-serif" font-size="8" fill="#000">♛</text>
+    </g>
+    
+    <!-- FEN转换 -->
+    <rect x="110" y="50" width="120" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#45B7D1" stroke-width="1"/>
+    <text x="170" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      FEN转换
+    </text>
+    <text x="170" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      棋盘状态编码
+    </text>
+    
+    <!-- 走法生成 -->
+    <rect x="110" y="100" width="120" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#96CEB4" stroke-width="1"/>
+    <text x="170" y="115" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      走法生成
+    </text>
+    <text x="170" y="128" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      代数记谱法
+    </text>
+    
+    <!-- 局面分析 -->
+    <rect x="20" y="140" width="210" height="40" rx="5" fill="rgba(255,255,255,0.9)" stroke="#45B7D1" stroke-width="1"/>
+    <text x="125" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      智能局面分析与走法推荐
+    </text>
+    <text x="125" y="168" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+      战术识别 • 战略规划 • 风险评估
+    </text>
+  </g>
+  
+  <!-- 5. 核心功能模块 -->
+  
+  <!-- 对话系统 -->
+  <g transform="translate(50, 360)">
+    <rect x="0" y="0" width="320" height="180" rx="15" fill="#E8F4FD" stroke="#2E86AB" stroke-width="2" filter="url(#shadow)"/>
+    <text x="160" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#2E86AB">
+      智能对话系统
+    </text>
+    
+    <!-- 对话气泡示例 -->
+    <g transform="translate(20, 50)">
+      <!-- 机器人消息 -->
+      <ellipse cx="40" cy="20" rx="35" ry="15" fill="#4ECDC4" stroke="#45B7D1" stroke-width="1"/>
+      <text x="40" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">
+        让我思考一下...
+      </text>
+      
+      <!-- 玩家消息 -->
+      <ellipse cx="240" cy="50" rx="45" ry="15" fill="#FF6B6B" stroke="#E55353" stroke-width="1"/>
+      <text x="240" y="55" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="white">
+        这步棋很有趣！
+      </text>
+    </g>
+    
+    <!-- 功能特性 -->
+    <rect x="20" y="90" width="280" height="70" rx="5" fill="rgba(255,255,255,0.8)" stroke="#2E86AB" stroke-width="1"/>
+    <text x="30" y="105" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      对话功能:
+    </text>
+    <text x="30" y="118" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 实时棋局解说和分析
+    </text>
+    <text x="30" y="130" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 个性化机器人对话风格
+    </text>
+    <text x="30" y="142" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 教学指导和战术提示
+    </text>
+    <text x="30" y="154" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 友好互动和鼓励反馈
+    </text>
+  </g>
+  
+  <!-- 棋局分析 -->
+  <g transform="translate(400, 360)">
+    <rect x="0" y="0" width="320" height="180" rx="15" fill="#FFF5E6" stroke="#F39C12" stroke-width="2" filter="url(#shadow)"/>
+    <text x="160" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#F39C12">
+      智能棋局分析
+    </text>
+    
+    <!-- 分析流程 -->
+    <g transform="translate(20, 50)">
+      <!-- 步骤1 -->
+      <circle cx="30" cy="20" r="15" fill="#3498DB" stroke="#2980B9" stroke-width="2"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">1</text>
+      <text x="30" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">局面评估</text>
+      
+      <!-- 箭头 -->
+      <path d="M 50 20 L 70 20" stroke="#34495E" stroke-width="2" marker-end="url(#arrowhead)"/>
+      
+      <!-- 步骤2 -->
+      <circle cx="90" cy="20" r="15" fill="#E74C3C" stroke="#C0392B" stroke-width="2"/>
+      <text x="90" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">2</text>
+      <text x="90" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">候选走法</text>
+      
+      <!-- 箭头 -->
+      <path d="M 110 20 L 130 20" stroke="#34495E" stroke-width="2" marker-end="url(#arrowhead)"/>
+      
+      <!-- 步骤3 -->
+      <circle cx="150" cy="20" r="15" fill="#27AE60" stroke="#229954" stroke-width="2"/>
+      <text x="150" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">3</text>
+      <text x="150" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">最优选择</text>
+      
+      <!-- 箭头 -->
+      <path d="M 170 20 L 190 20" stroke="#34495E" stroke-width="2" marker-end="url(#arrowhead)"/>
+      
+      <!-- 步骤4 -->
+      <circle cx="210" cy="20" r="15" fill="#9B59B6" stroke="#8E44AD" stroke-width="2"/>
+      <text x="210" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">4</text>
+      <text x="210" y="40" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">执行走法</text>
+    </g>
+    
+    <!-- 分析特性 -->
+    <rect x="20" y="90" width="280" height="70" rx="5" fill="rgba(255,255,255,0.8)" stroke="#F39C12" stroke-width="1"/>
+    <text x="30" y="105" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      分析能力:
+    </text>
+    <text x="30" y="118" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 深度局面理解和战术识别
+    </text>
+    <text x="30" y="130" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 多步变化计算和预判
+    </text>
+    <text x="30" y="142" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 开局理论和残局技巧
+    </text>
+    <text x="30" y="154" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 个性化风格和难度调节
+    </text>
+  </g>
+  
+  <!-- 对局总结 -->
+  <g transform="translate(750, 360)">
+    <rect x="0" y="0" width="320" height="180" rx="15" fill="#F0E6FF" stroke="#8E44AD" stroke-width="2" filter="url(#shadow)"/>
+    <text x="160" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#8E44AD">
+      对局总结与教学
+    </text>
+    
+    <!-- 总结内容 -->
+    <rect x="20" y="50" width="280" height="110" rx="5" fill="rgba(255,255,255,0.8)" stroke="#8E44AD" stroke-width="1"/>
+    <text x="30" y="65" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+      智能总结功能:
+    </text>
+    <text x="30" y="78" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 开局分析：评估开局选择和前期走法质量
+    </text>
+    <text x="30" y="90" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 中局要点：识别关键战术时刻和转折点
+    </text>
+    <text x="30" y="102" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 关键失误：指出重要失误及正确走法
+    </text>
+    <text x="30" y="114" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 优秀走法：赞扬精彩的战术决策
+    </text>
+    <text x="30" y="126" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 结局分析：分析游戏结束方式
+    </text>
+    <text x="30" y="138" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 学习建议：提供具体的改进建议
+    </text>
+    <text x="30" y="150" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      • 总体评价：对棋局水平评分(1-10分)
+    </text>
+  </g>
+  
+  <!-- 6. 技术特色 -->
+  <g transform="translate(50, 580)">
+    <rect x="0" y="0" width="1320" height="120" rx="15" fill="#E8F8F5" stroke="#27AE60" stroke-width="2" filter="url(#shadow)"/>
+    <text x="660" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#27AE60">
+      技术特色与优势
+    </text>
+    
+    <!-- 特色1 -->
+    <g transform="translate(50, 50)">
+      <circle cx="30" cy="20" r="20" fill="#3498DB" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">AI</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        多模型融合
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        DeepSeek + Kimi
+      </text>
+    </g>
+    
+    <!-- 特色2 -->
+    <g transform="translate(200, 50)">
+      <circle cx="30" cy="20" r="20" fill="#E74C3C" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">🎯</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        个性化风格
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        5种机器人类型
+      </text>
+    </g>
+    
+    <!-- 特色3 -->
+    <g transform="translate(350, 50)">
+      <circle cx="30" cy="20" r="20" fill="#F39C12" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">⚡</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        智能切换
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        自动故障转移
+      </text>
+    </g>
+    
+    <!-- 特色4 -->
+    <g transform="translate(500, 50)">
+      <circle cx="30" cy="20" r="20" fill="#9B59B6" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">🧠</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        深度思考
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        5级思考深度
+      </text>
+    </g>
+    
+    <!-- 特色5 -->
+    <g transform="translate(650, 50)">
+      <circle cx="30" cy="20" r="20" fill="#27AE60" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">📚</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        教学导向
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        专业分析指导
+      </text>
+    </g>
+    
+    <!-- 特色6 -->
+    <g transform="translate(800, 50)">
+      <circle cx="30" cy="20" r="20" fill="#E67E22" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">💬</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        实时对话
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        智能交互体验
+      </text>
+    </g>
+    
+    <!-- 特色7 -->
+    <g transform="translate(950, 50)">
+      <circle cx="30" cy="20" r="20" fill="#34495E" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">🔧</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        参数调节
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        温度/深度可调
+      </text>
+    </g>
+    
+    <!-- 特色8 -->
+    <g transform="translate(1100, 50)">
+      <circle cx="30" cy="20" r="20" fill="#16A085" filter="url(#glow)"/>
+      <text x="30" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">📊</text>
+      <text x="30" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="#333">
+        数据分析
+      </text>
+      <text x="30" y="58" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#666">
+        FEN/PGN支持
+      </text>
+    </g>
+  </g>
+  
+  <!-- 7. 应用场景 -->
+  <g transform="translate(50, 730)">
+    <rect x="0" y="0" width="1320" height="100" rx="15" fill="#FDF2E9" stroke="#E67E22" stroke-width="2" filter="url(#shadow)"/>
+    <text x="660" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#E67E22">
+      应用场景
+    </text>
+    
+    <!-- 场景1 -->
+    <rect x="50" y="50" width="200" height="35" rx="8" fill="rgba(255,255,255,0.9)" stroke="#E67E22" stroke-width="1"/>
+    <text x="150" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">
+      🎓 国际象棋教学
+    </text>
+    <text x="150" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      个性化AI教练，因材施教
+    </text>
+    
+    <!-- 场景2 -->
+    <rect x="270" y="50" width="200" height="35" rx="8" fill="rgba(255,255,255,0.9)" stroke="#E67E22" stroke-width="1"/>
+    <text x="370" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">
+      🏆 竞技训练
+    </text>
+    <text x="370" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      高水平AI陪练，提升棋力
+    </text>
+    
+    <!-- 场景3 -->
+    <rect x="490" y="50" width="200" height="35" rx="8" fill="rgba(255,255,255,0.9)" stroke="#E67E22" stroke-width="1"/>
+    <text x="590" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">
+      📖 棋局分析
+    </text>
+    <text x="590" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      专业复盘，深度解析
+    </text>
+    
+    <!-- 场景4 -->
+    <rect x="710" y="50" width="200" height="35" rx="8" fill="rgba(255,255,255,0.9)" stroke="#E67E22" stroke-width="1"/>
+    <text x="810" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">
+      🎮 休闲娱乐
+    </text>
+    <text x="810" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      智能对话，趣味对弈
+    </text>
+    
+    <!-- 场景5 -->
+    <rect x="930" y="50" width="200" height="35" rx="8" fill="rgba(255,255,255,0.9)" stroke="#E67E22" stroke-width="1"/>
+    <text x="1030" y="65" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" font-weight="bold" fill="#333">
+      🔬 AI研究
+    </text>
+    <text x="1030" y="78" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#666">
+      大模型在棋类游戏的应用
+    </text>
+  </g>
+  
+  <!-- 连接线 -->
+  <!-- 从大语言模型到机器人系统 -->
+  <path d="M 350 220 L 400 220" stroke="#2E86AB" stroke-width="3" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- 从机器人系统到API层 -->
+  <path d="M 750 220 L 800 220" stroke="#2E86AB" stroke-width="3" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- 从API层到应用层 -->
+  <path d="M 1080 220 L 1120 220" stroke="#2E86AB" stroke-width="3" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- 从核心到功能模块的连接 -->
+  <path d="M 200 320 L 200 360" stroke="#34495E" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  <path d="M 560 320 L 560 360" stroke="#34495E" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  <path d="M 910 320 L 910 360" stroke="#34495E" stroke-width="2" marker-end="url(#arrowhead)" fill="none"/>
+  
+  <!-- 箭头标记定义 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#2E86AB" />
+    </marker>
+  </defs>
+  
+  <!-- 底部信息 -->
+  <g transform="translate(50, 860)">
+    <rect x="0" y="0" width="1320" height="60" rx="10" fill="#34495E" opacity="0.9"/>
+    <text x="660" y="25" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">
+      NovaChess - 大语言模型驱动的智能国际象棋系统
+    </text>
+    <text x="660" y="45" text-anchor="middle" font-family="Arial, sans-serif" font-size="11" fill="#BDC3C7">
+      融合传统AI引擎与现代大语言模型，打造全新的智能对弈体验
+    </text>
+  </g>
+  
+</svg>

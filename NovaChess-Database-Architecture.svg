@@ -1,0 +1,252 @@
+<svg width="1200" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- 背景 -->
+  <rect width="1200" height="900" fill="#f8f9fa"/>
+  
+  <!-- 标题 -->
+  <text x="600" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#2c3e50">NovaChess 数据库架构设计 (基于阿里云)</text>
+  
+  <!-- 阿里云基础设施层 -->
+  <rect x="50" y="60" width="1100" height="120" fill="#ff6b35" stroke="#e55a2b" stroke-width="2" rx="10"/>
+  <text x="600" y="85" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">阿里云基础设施层</text>
+  
+  <!-- 阿里云服务 -->
+  <rect x="80" y="100" width="150" height="60" fill="#ff8c69" stroke="#ff6b35" stroke-width="1" rx="5"/>
+  <text x="155" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">ECS 云服务器</text>
+  <text x="155" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">应用部署</text>
+  <text x="155" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">负载均衡</text>
+  
+  <rect x="250" y="100" width="150" height="60" fill="#ff8c69" stroke="#ff6b35" stroke-width="1" rx="5"/>
+  <text x="325" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">RDS MySQL</text>
+  <text x="325" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">主从复制</text>
+  <text x="325" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">自动备份</text>
+  
+  <rect x="420" y="100" width="150" height="60" fill="#ff8c69" stroke="#ff6b35" stroke-width="1" rx="5"/>
+  <text x="495" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">Redis 云数据库</text>
+  <text x="495" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">集群模式</text>
+  <text x="495" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">高可用</text>
+  
+  <rect x="590" y="100" width="150" height="60" fill="#ff8c69" stroke="#ff6b35" stroke-width="1" rx="5"/>
+  <text x="665" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">OSS 对象存储</text>
+  <text x="665" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">文件存储</text>
+  <text x="665" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">CDN加速</text>
+  
+  <rect x="760" y="100" width="150" height="60" fill="#ff8c69" stroke="#ff6b35" stroke-width="1" rx="5"/>
+  <text x="835" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">SLB 负载均衡</text>
+  <text x="835" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">流量分发</text>
+  <text x="835" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">健康检查</text>
+  
+  <rect x="930" y="100" width="150" height="60" fill="#ff8c69" stroke="#ff6b35" stroke-width="1" rx="5"/>
+  <text x="1005" y="120" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="white">VPC 专有网络</text>
+  <text x="1005" y="135" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">网络隔离</text>
+  <text x="1005" y="150" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">安全组</text>
+  
+  <!-- MySQL 数据库设计 -->
+  <rect x="50" y="200" width="550" height="650" fill="#3498db" stroke="#2980b9" stroke-width="2" rx="10"/>
+  <text x="325" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">MySQL 数据库设计</text>
+  
+  <!-- 核心游戏模块 -->
+  <rect x="70" y="240" width="250" height="180" fill="#5dade2" stroke="#3498db" stroke-width="1" rx="5"/>
+  <text x="195" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">核心游戏模块</text>
+  
+  <rect x="80" y="270" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="135" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_game</text>
+  <text x="135" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">游戏主表</text>
+  <text x="135" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">游戏状态、类型</text>
+  <text x="135" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">当前回合、结果</text>
+  
+  <rect x="200" y="270" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="255" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_player</text>
+  <text x="255" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">游戏参与者</text>
+  <text x="255" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">用户ID、执子方</text>
+  <text x="255" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">水平、类型</text>
+  
+  <rect x="80" y="340" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="135" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_move</text>
+  <text x="135" y="368" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">下棋记录</text>
+  <text x="135" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">起始位置、目标</text>
+  <text x="135" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">被吃棋子、耗时</text>
+  
+  <rect x="200" y="340" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="255" y="355" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_pieces</text>
+  <text x="255" y="368" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">棋子位置</text>
+  <text x="255" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">棋子名称、类型</text>
+  <text x="255" y="390" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">位置、状态</text>
+  
+  <!-- 教学系统模块 -->
+  <rect x="340" y="240" width="250" height="180" fill="#5dade2" stroke="#3498db" stroke-width="1" rx="5"/>
+  <text x="465" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">教学系统模块</text>
+  
+  <rect x="350" y="270" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="405" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_courses</text>
+  <text x="405" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">课程主表</text>
+  <text x="405" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">课程名称、描述</text>
+  <text x="405" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">难度级别</text>
+  
+  <rect x="470" y="270" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="525" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_course_steps</text>
+  <text x="525" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">课程步骤</text>
+  <text x="525" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">步骤顺序</text>
+  <text x="525" y="320" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">操作说明</text>
+  
+  <!-- 积分系统模块 -->
+  <rect x="70" y="440" width="250" height="120" fill="#5dade2" stroke="#3498db" stroke-width="1" rx="5"/>
+  <text x="195" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">积分系统模块</text>
+  
+  <rect x="80" y="470" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="135" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_player_score</text>
+  <text x="135" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">选手积分</text>
+  <text x="135" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">用户ID、得分</text>
+  <text x="135" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">初始值600</text>
+  
+  <rect x="200" y="470" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="255" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_player_score_record</text>
+  <text x="255" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">得分记录</text>
+  <text x="255" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">游戏ID、得分</text>
+  <text x="255" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">正负值记录</text>
+  
+  <!-- 社交功能模块 -->
+  <rect x="340" y="440" width="250" height="120" fill="#5dade2" stroke="#3498db" stroke-width="1" rx="5"/>
+  <text x="465" y="460" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">社交功能模块</text>
+  
+  <rect x="350" y="470" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="405" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_friend_pair</text>
+  <text x="405" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">好友对局</text>
+  <text x="405" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">好友关系</text>
+  <text x="405" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">对局记录</text>
+  
+  <rect x="470" y="470" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="525" y="485" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">chess_draw_request</text>
+  <text x="525" y="498" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">和棋请求</text>
+  <text x="525" y="510" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">请求状态</text>
+  <text x="525" y="520" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">处理结果</text>
+  
+  <!-- 系统管理模块 -->
+  <rect x="70" y="580" width="520" height="120" fill="#5dade2" stroke="#3498db" stroke-width="1" rx="5"/>
+  <text x="330" y="600" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">系统管理模块</text>
+  
+  <rect x="80" y="610" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="135" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">sys_user</text>
+  <text x="135" y="638" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">用户表</text>
+  <text x="135" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">用户信息</text>
+  <text x="135" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">认证授权</text>
+  
+  <rect x="200" y="610" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="255" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">sys_depart</text>
+  <text x="255" y="638" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">组织机构</text>
+  <text x="255" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">部门管理</text>
+  <text x="255" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">权限控制</text>
+  
+  <rect x="320" y="610" width="110" height="60" fill="#85c1e9" stroke="#5dade2" stroke-width="1" rx="3"/>
+  <text x="375" y="625" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">sys_message</text>
+  <text x="375" y="638" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">系统消息</text>
+  <text x="375" y="650" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">通知推送</text>
+  <text x="375" y="660" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">消息状态</text>
+  
+  <!-- 数据库特性 -->
+  <rect x="70" y="720" width="520" height="120" fill="#5dade2" stroke="#3498db" stroke-width="1" rx="5"/>
+  <text x="330" y="740" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">数据库特性</text>
+  
+  <text x="90" y="760" font-family="Arial, sans-serif" font-size="11" fill="white">• 字符集：UTF8MB3/UTF8MB4 支持多语言</text>
+  <text x="90" y="775" font-family="Arial, sans-serif" font-size="11" fill="white">• 存储引擎：InnoDB 支持事务和外键</text>
+  <text x="90" y="790" font-family="Arial, sans-serif" font-size="11" fill="white">• 索引优化：主键、唯一键、普通索引</text>
+  <text x="90" y="805" font-family="Arial, sans-serif" font-size="11" fill="white">• 数据完整性：NOT NULL、DEFAULT 约束</text>
+  <text x="90" y="820" font-family="Arial, sans-serif" font-size="11" fill="white">• 审计字段：create_time、update_time、del_flag</text>
+  
+  <!-- Redis 缓存设计 -->
+  <rect x="620" y="200" width="530" height="650" fill="#e74c3c" stroke="#c0392b" stroke-width="2" rx="10"/>
+  <text x="885" y="225" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="white">Redis 缓存设计</text>
+  
+  <!-- 会话管理 -->
+  <rect x="640" y="240" width="240" height="120" fill="#ec7063" stroke="#e74c3c" stroke-width="1" rx="5"/>
+  <text x="760" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">会话管理</text>
+  
+  <rect x="650" y="270" width="220" height="80" fill="#f1948a" stroke="#ec7063" stroke-width="1" rx="3"/>
+  <text x="760" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">用户Token缓存</text>
+  <text x="760" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">PREFIX_USER_TOKEN + token</text>
+  <text x="760" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">JWT令牌存储，过期时间控制</text>
+  <text x="760" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">用户登录状态管理</text>
+  <text x="760" y="334" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">Shiro权限缓存</text>
+  
+  <!-- 验证码缓存 -->
+  <rect x="900" y="240" width="240" height="120" fill="#ec7063" stroke="#e74c3c" stroke-width="1" rx="5"/>
+  <text x="1020" y="260" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">验证码缓存</text>
+  
+  <rect x="910" y="270" width="220" height="80" fill="#f1948a" stroke="#ec7063" stroke-width="1" rx="3"/>
+  <text x="1020" y="285" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">图形验证码</text>
+  <text x="1020" y="298" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">checkCode + key</text>
+  <text x="1020" y="310" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">60秒过期时间</text>
+  <text x="1020" y="322" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">短信验证码缓存</text>
+  <text x="1020" y="334" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">PHONE_REDIS_KEY_PRE + phone</text>
+  
+  <!-- 系统缓存 -->
+  <rect x="640" y="380" width="240" height="120" fill="#ec7063" stroke="#e74c3c" stroke-width="1" rx="5"/>
+  <text x="760" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">系统缓存</text>
+  
+  <rect x="650" y="410" width="220" height="80" fill="#f1948a" stroke="#ec7063" stroke-width="1" rx="3"/>
+  <text x="760" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">字典数据缓存</text>
+  <text x="760" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">SYS_DICT_CACHE</text>
+  <text x="760" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">部门数据缓存</text>
+  <text x="760" y="462" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">SYS_DEPARTS_CACHE</text>
+  <text x="760" y="474" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">用户信息缓存</text>
+  
+  <!-- WebSocket消息 -->
+  <rect x="900" y="380" width="240" height="120" fill="#ec7063" stroke="#e74c3c" stroke-width="1" rx="5"/>
+  <text x="1020" y="400" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">WebSocket消息</text>
+  
+  <rect x="910" y="410" width="220" height="80" fill="#f1948a" stroke="#ec7063" stroke-width="1" rx="3"/>
+  <text x="1020" y="425" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">发布订阅模式</text>
+  <text x="1020" y="438" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">REDIS_TOPIC_NAME</text>
+  <text x="1020" y="450" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">集群消息推送</text>
+  <text x="1020" y="462" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">实时对战通信</text>
+  <text x="1020" y="474" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">socketHandler</text>
+  
+  <!-- 业务缓存 -->
+  <rect x="640" y="520" width="240" height="120" fill="#ec7063" stroke="#e74c3c" stroke-width="1" rx="5"/>
+  <text x="760" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">业务缓存</text>
+  
+  <rect x="650" y="550" width="220" height="80" fill="#f1948a" stroke="#ec7063" stroke-width="1" rx="3"/>
+  <text x="760" y="565" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">登录失败计数</text>
+  <text x="760" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">LOGIN_FAIL + username</text>
+  <text x="760" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">二维码登录缓存</text>
+  <text x="760" y="602" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">LOGIN_QRCODE + qrcodeId</text>
+  <text x="760" y="614" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">网关路由缓存</text>
+  
+  <!-- 分布式锁 -->
+  <rect x="900" y="520" width="240" height="120" fill="#ec7063" stroke="#e74c3c" stroke-width="1" rx="5"/>
+  <text x="1020" y="540" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">分布式锁</text>
+  
+  <rect x="910" y="550" width="220" height="80" fill="#f1948a" stroke="#ec7063" stroke-width="1" rx="3"/>
+  <text x="1020" y="565" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#2c3e50">Redisson分布式锁</text>
+  <text x="1020" y="578" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2c3e50">REDISSON_DEMO_LOCK_KEY</text>
+  <text x="1020" y="590" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">并发控制</text>
+  <text x="1020" y="602" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">资源互斥访问</text>
+  <text x="1020" y="614" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#2c3e50">集群环境同步</text>
+  
+  <!-- Redis特性 -->
+  <rect x="640" y="660" width="500" height="180" fill="#ec7063" stroke="#e74c3c" stroke-width="1" rx="5"/>
+  <text x="890" y="680" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="white">Redis 特性与优势</text>
+  
+  <text x="660" y="700" font-family="Arial, sans-serif" font-size="11" fill="white">• 高性能：内存存储，毫秒级响应</text>
+  <text x="660" y="715" font-family="Arial, sans-serif" font-size="11" fill="white">• 数据结构：String、Hash、List、Set、ZSet</text>
+  <text x="660" y="730" font-family="Arial, sans-serif" font-size="11" fill="white">• 持久化：RDB快照 + AOF日志</text>
+  <text x="660" y="745" font-family="Arial, sans-serif" font-size="11" fill="white">• 集群模式：主从复制、哨兵、分片集群</text>
+  <text x="660" y="760" font-family="Arial, sans-serif" font-size="11" fill="white">• 发布订阅：实时消息推送</text>
+  <text x="660" y="775" font-family="Arial, sans-serif" font-size="11" fill="white">• 分布式锁：Redisson实现</text>
+  <text x="660" y="790" font-family="Arial, sans-serif" font-size="11" fill="white">• 过期策略：TTL自动清理</text>
+  <text x="660" y="805" font-family="Arial, sans-serif" font-size="11" fill="white">• 监控告警：性能指标实时监控</text>
+  <text x="660" y="820" font-family="Arial, sans-serif" font-size="11" fill="white">• 安全机制：密码认证、网络隔离</text>
+  
+  <!-- 连接线 -->
+  <line x1="325" y1="160" x2="325" y2="200" stroke="#34495e" stroke-width="2" marker-end="url(#arrowhead)"/>
+  <line x1="495" y1="160" x2="885" y2="200" stroke="#34495e" stroke-width="2" marker-end="url(#arrowhead)"/>
+  
+  <!-- 箭头标记 -->
+  <defs>
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#34495e"/>
+    </marker>
+  </defs>
+  
+  <!-- 版本信息 -->
+  <text x="1150" y="890" text-anchor="end" font-family="Arial, sans-serif" font-size="10" fill="#7f8c8d">NovaChess v1.0 - Database Architecture</text>
+</svg>

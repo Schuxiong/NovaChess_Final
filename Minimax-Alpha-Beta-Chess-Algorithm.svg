@@ -1,0 +1,348 @@
+<svg width="1400" height="1000" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <!-- 渐变定义 -->
+    <linearGradient id="maxGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#4CAF50;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#45a049;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="minGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#2196F3;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#1976D2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="prunedGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#FF5722;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#D32F2F;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="boardGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#F5F5DC;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#DEB887;stop-opacity:1" />
+    </linearGradient>
+    
+    <!-- 箭头标记 -->
+    <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#333" />
+    </marker>
+    <marker id="prunedArrow" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+      <polygon points="0 0, 10 3.5, 0 7" fill="#FF5722" />
+    </marker>
+  </defs>
+  
+  <!-- 背景 -->
+  <rect width="1400" height="1000" fill="#f8f9fa" stroke="#ddd" stroke-width="2"/>
+  
+  <!-- 标题 -->
+  <text x="700" y="30" text-anchor="middle" font-family="Arial, sans-serif" font-size="24" font-weight="bold" fill="#333">Minimax算法结合Alpha-Beta剪枝的国际象棋AI决策过程</text>
+  
+  <!-- 左侧：算法搜索树 -->
+  <g id="algorithm-tree">
+    <text x="350" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#333">算法搜索树 (深度=3)</text>
+    
+    <!-- 根节点 (MAX层) -->
+    <g id="root-node">
+      <circle cx="350" cy="120" r="25" fill="url(#maxGradient)" stroke="#333" stroke-width="2"/>
+      <text x="350" y="125" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">MAX</text>
+      <text x="350" y="155" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">α=-∞, β=+∞</text>
+      <text x="350" y="170" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">评估值: 0.5</text>
+    </g>
+    
+    <!-- 第二层 (MIN层) -->
+    <g id="min-layer">
+      <!-- MIN节点1 -->
+      <circle cx="200" cy="250" r="20" fill="url(#minGradient)" stroke="#333" stroke-width="2"/>
+      <text x="200" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">MIN</text>
+      <text x="200" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">α=-∞, β=0.5</text>
+      <text x="200" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">值: 0.3</text>
+      
+      <!-- MIN节点2 -->
+      <circle cx="350" cy="250" r="20" fill="url(#minGradient)" stroke="#333" stroke-width="2"/>
+      <text x="350" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">MIN</text>
+      <text x="350" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">α=0.3, β=+∞</text>
+      <text x="350" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#333">值: 0.5</text>
+      
+      <!-- MIN节点3 (被剪枝) -->
+      <circle cx="500" cy="250" r="20" fill="url(#prunedGradient)" stroke="#333" stroke-width="2" stroke-dasharray="5,5"/>
+      <text x="500" y="255" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" font-weight="bold" fill="white">MIN</text>
+      <text x="500" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#FF5722">被剪枝</text>
+      <text x="500" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#FF5722">α≥β</text>
+    </g>
+    
+    <!-- 第三层 (MAX层) -->
+    <g id="max-layer">
+      <!-- 左分支的MAX节点 -->
+      <circle cx="150" cy="380" r="15" fill="url(#maxGradient)" stroke="#333" stroke-width="1"/>
+      <text x="150" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">MAX</text>
+      <text x="150" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">0.3</text>
+      
+      <circle cx="250" cy="380" r="15" fill="url(#maxGradient)" stroke="#333" stroke-width="1"/>
+      <text x="250" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">MAX</text>
+      <text x="250" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">0.1</text>
+      
+      <!-- 中分支的MAX节点 -->
+      <circle cx="300" cy="380" r="15" fill="url(#maxGradient)" stroke="#333" stroke-width="1"/>
+      <text x="300" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">MAX</text>
+      <text x="300" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">0.5</text>
+      
+      <circle cx="400" cy="380" r="15" fill="url(#maxGradient)" stroke="#333" stroke-width="1"/>
+      <text x="400" y="385" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="white">MAX</text>
+      <text x="400" y="405" text-anchor="middle" font-family="Arial, sans-serif" font-size="8" fill="#333">0.2</text>
+    </g>
+    
+    <!-- 连接线 -->
+    <line x1="350" y1="145" x2="200" y2="230" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="350" y1="145" x2="350" y2="230" stroke="#333" stroke-width="2" marker-end="url(#arrowhead)"/>
+    <line x1="350" y1="145" x2="500" y2="230" stroke="#FF5722" stroke-width="2" stroke-dasharray="5,5" marker-end="url(#prunedArrow)"/>
+    
+    <line x1="200" y1="270" x2="150" y2="365" stroke="#333" stroke-width="1" marker-end="url(#arrowhead)"/>
+    <line x1="200" y1="270" x2="250" y2="365" stroke="#333" stroke-width="1" marker-end="url(#arrowhead)"/>
+    <line x1="350" y1="270" x2="300" y2="365" stroke="#333" stroke-width="1" marker-end="url(#arrowhead)"/>
+    <line x1="350" y1="270" x2="400" y2="365" stroke="#333" stroke-width="1" marker-end="url(#arrowhead)"/>
+    
+    <!-- Alpha-Beta剪枝说明 -->
+    <rect x="50" y="450" width="600" height="120" fill="#fff" stroke="#ddd" stroke-width="1" rx="5"/>
+    <text x="350" y="475" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#333">Alpha-Beta剪枝原理</text>
+    <text x="70" y="500" font-family="Arial, sans-serif" font-size="12" fill="#333">• α (Alpha): MAX层的下界，表示MAX玩家能保证的最小值</text>
+    <text x="70" y="520" font-family="Arial, sans-serif" font-size="12" fill="#333">• β (Beta): MIN层的上界，表示MIN玩家能保证的最大值</text>
+    <text x="70" y="540" font-family="Arial, sans-serif" font-size="12" fill="#333">• 剪枝条件: 当 α ≥ β 时，可以安全地剪枝后续分支</text>
+    <text x="70" y="560" font-family="Arial, sans-serif" font-size="12" fill="#FF5722">• 右侧红色节点被剪枝，因为已找到更优解，无需继续搜索</text>
+  </g>
+  
+  <!-- 右侧：国际象棋棋盘展示 -->
+  <g id="chess-board">
+    <text x="1050" y="70" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#333">对应棋盘局面</text>
+    
+    <!-- 棋盘背景 -->
+    <rect x="850" y="100" width="400" height="400" fill="url(#boardGradient)" stroke="#8B4513" stroke-width="3" rx="5"/>
+    
+    <!-- 棋盘格子 -->
+    <g id="board-squares">
+      <!-- 绘制8x8棋盘 -->
+      <!-- 第1行 -->
+      <rect x="850" y="100" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="900" y="100" width="50" height="50" fill="#D2691E"/>
+      <rect x="950" y="100" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1000" y="100" width="50" height="50" fill="#D2691E"/>
+      <rect x="1050" y="100" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1100" y="100" width="50" height="50" fill="#D2691E"/>
+      <rect x="1150" y="100" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1200" y="100" width="50" height="50" fill="#D2691E"/>
+      
+      <!-- 第2行 -->
+      <rect x="850" y="150" width="50" height="50" fill="#D2691E"/>
+      <rect x="900" y="150" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="950" y="150" width="50" height="50" fill="#D2691E"/>
+      <rect x="1000" y="150" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1050" y="150" width="50" height="50" fill="#D2691E"/>
+      <rect x="1100" y="150" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1150" y="150" width="50" height="50" fill="#D2691E"/>
+      <rect x="1200" y="150" width="50" height="50" fill="#F5F5DC"/>
+      
+      <!-- 第3行 -->
+      <rect x="850" y="200" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="900" y="200" width="50" height="50" fill="#D2691E"/>
+      <rect x="950" y="200" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1000" y="200" width="50" height="50" fill="#D2691E"/>
+      <rect x="1050" y="200" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1100" y="200" width="50" height="50" fill="#D2691E"/>
+      <rect x="1150" y="200" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1200" y="200" width="50" height="50" fill="#D2691E"/>
+      
+      <!-- 第4行 -->
+      <rect x="850" y="250" width="50" height="50" fill="#D2691E"/>
+      <rect x="900" y="250" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="950" y="250" width="50" height="50" fill="#D2691E"/>
+      <rect x="1000" y="250" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1050" y="250" width="50" height="50" fill="#D2691E"/>
+      <rect x="1100" y="250" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1150" y="250" width="50" height="50" fill="#D2691E"/>
+      <rect x="1200" y="250" width="50" height="50" fill="#F5F5DC"/>
+      
+      <!-- 第5行 -->
+      <rect x="850" y="300" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="900" y="300" width="50" height="50" fill="#D2691E"/>
+      <rect x="950" y="300" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1000" y="300" width="50" height="50" fill="#D2691E"/>
+      <rect x="1050" y="300" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1100" y="300" width="50" height="50" fill="#D2691E"/>
+      <rect x="1150" y="300" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1200" y="300" width="50" height="50" fill="#D2691E"/>
+      
+      <!-- 第6行 -->
+      <rect x="850" y="350" width="50" height="50" fill="#D2691E"/>
+      <rect x="900" y="350" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="950" y="350" width="50" height="50" fill="#D2691E"/>
+      <rect x="1000" y="350" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1050" y="350" width="50" height="50" fill="#D2691E"/>
+      <rect x="1100" y="350" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1150" y="350" width="50" height="50" fill="#D2691E"/>
+      <rect x="1200" y="350" width="50" height="50" fill="#F5F5DC"/>
+      
+      <!-- 第7行 -->
+      <rect x="850" y="400" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="900" y="400" width="50" height="50" fill="#D2691E"/>
+      <rect x="950" y="400" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1000" y="400" width="50" height="50" fill="#D2691E"/>
+      <rect x="1050" y="400" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1100" y="400" width="50" height="50" fill="#D2691E"/>
+      <rect x="1150" y="400" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1200" y="400" width="50" height="50" fill="#D2691E"/>
+      
+      <!-- 第8行 -->
+      <rect x="850" y="450" width="50" height="50" fill="#D2691E"/>
+      <rect x="900" y="450" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="950" y="450" width="50" height="50" fill="#D2691E"/>
+      <rect x="1000" y="450" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1050" y="450" width="50" height="50" fill="#D2691E"/>
+      <rect x="1100" y="450" width="50" height="50" fill="#F5F5DC"/>
+      <rect x="1150" y="450" width="50" height="50" fill="#D2691E"/>
+      <rect x="1200" y="450" width="50" height="50" fill="#F5F5DC"/>
+    </g>
+    
+    <!-- 棋子 (简化表示) -->
+    <g id="chess-pieces">
+      <!-- 白方棋子 -->
+      <circle cx="875" cy="475" r="15" fill="white" stroke="#333" stroke-width="2"/>
+      <text x="875" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">♖</text>
+      
+      <circle cx="925" cy="475" r="15" fill="white" stroke="#333" stroke-width="2"/>
+      <text x="925" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">♘</text>
+      
+      <circle cx="975" cy="475" r="15" fill="white" stroke="#333" stroke-width="2"/>
+      <text x="975" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">♗</text>
+      
+      <circle cx="1025" cy="475" r="15" fill="white" stroke="#333" stroke-width="2"/>
+      <text x="1025" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">♕</text>
+      
+      <circle cx="1075" cy="475" r="15" fill="white" stroke="#333" stroke-width="2"/>
+      <text x="1075" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">♔</text>
+      
+      <!-- 白方兵 -->
+      <circle cx="875" cy="425" r="12" fill="white" stroke="#333" stroke-width="1"/>
+      <text x="875" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">♙</text>
+      
+      <circle cx="925" cy="425" r="12" fill="white" stroke="#333" stroke-width="1"/>
+      <text x="925" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">♙</text>
+      
+      <circle cx="1025" cy="325" r="12" fill="white" stroke="#333" stroke-width="1"/>
+      <text x="1025" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#333">♙</text>
+      
+      <!-- 黑方棋子 -->
+      <circle cx="875" cy="125" r="15" fill="#333" stroke="#666" stroke-width="2"/>
+      <text x="875" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">♜</text>
+      
+      <circle cx="925" cy="125" r="15" fill="#333" stroke="#666" stroke-width="2"/>
+      <text x="925" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">♞</text>
+      
+      <circle cx="1075" cy="125" r="15" fill="#333" stroke="#666" stroke-width="2"/>
+      <text x="1075" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="white">♚</text>
+      
+      <!-- 黑方兵 -->
+      <circle cx="875" cy="175" r="12" fill="#333" stroke="#666" stroke-width="1"/>
+      <text x="875" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">♟</text>
+      
+      <circle cx="925" cy="175" r="12" fill="#333" stroke="#666" stroke-width="1"/>
+      <text x="925" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">♟</text>
+      
+      <circle cx="1025" cy="275" r="12" fill="#333" stroke="#666" stroke-width="1"/>
+      <text x="1025" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="white">♟</text>
+    </g>
+    
+    <!-- 可能的走法箭头 -->
+    <g id="possible-moves">
+      <!-- 白方可能的走法 -->
+      <path d="M 1025 325 Q 1050 300 1075 275" stroke="#4CAF50" stroke-width="3" fill="none" marker-end="url(#arrowhead)"/>
+      <text x="1050" y="295" text-anchor="middle" font-family="Arial, sans-serif" font-size="10" fill="#4CAF50" font-weight="bold">最佳走法</text>
+      
+      <path d="M 925 425 Q 950 400 975 375" stroke="#2196F3" stroke-width="2" fill="none" stroke-dasharray="3,3"/>
+      <text x="950" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#2196F3">备选走法</text>
+      
+      <path d="M 875 425 Q 900 400 925 375" stroke="#FF5722" stroke-width="2" fill="none" stroke-dasharray="5,5"/>
+      <text x="900" y="395" text-anchor="middle" font-family="Arial, sans-serif" font-size="9" fill="#FF5722">被剪枝</text>
+    </g>
+    
+    <!-- 坐标标记 -->
+    <g id="coordinates">
+      <!-- 列标记 -->
+      <text x="875" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">a</text>
+      <text x="925" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">b</text>
+      <text x="975" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">c</text>
+      <text x="1025" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">d</text>
+      <text x="1075" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">e</text>
+      <text x="1125" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">f</text>
+      <text x="1175" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">g</text>
+      <text x="1225" y="525" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">h</text>
+      
+      <!-- 行标记 -->
+      <text x="830" y="130" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">8</text>
+      <text x="830" y="180" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">7</text>
+      <text x="830" y="230" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">6</text>
+      <text x="830" y="280" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">5</text>
+      <text x="830" y="330" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">4</text>
+      <text x="830" y="380" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">3</text>
+      <text x="830" y="430" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">2</text>
+      <text x="830" y="480" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#333">1</text>
+    </g>
+  </g>
+  
+  <!-- 底部：算法步骤说明 -->
+  <g id="algorithm-steps">
+    <rect x="50" y="600" width="1300" height="350" fill="#fff" stroke="#ddd" stroke-width="2" rx="10"/>
+    <text x="700" y="630" text-anchor="middle" font-family="Arial, sans-serif" font-size="18" font-weight="bold" fill="#333">Minimax + Alpha-Beta剪枝算法执行步骤</text>
+    
+    <!-- 步骤1 -->
+    <g id="step1">
+      <rect x="80" y="650" width="300" height="120" fill="#E8F5E8" stroke="#4CAF50" stroke-width="2" rx="5"/>
+      <text x="230" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#2E7D32">步骤1: 初始化</text>
+      <text x="100" y="700" font-family="Arial, sans-serif" font-size="11" fill="#333">• 设置搜索深度 (depth = 3)</text>
+      <text x="100" y="720" font-family="Arial, sans-serif" font-size="11" fill="#333">• 初始化 α = -∞, β = +∞</text>
+      <text x="100" y="740" font-family="Arial, sans-serif" font-size="11" fill="#333">• 从根节点开始 (MAX层)</text>
+      <text x="100" y="760" font-family="Arial, sans-serif" font-size="11" fill="#333">• 生成所有可能的走法</text>
+    </g>
+    
+    <!-- 步骤2 -->
+    <g id="step2">
+      <rect x="400" y="650" width="300" height="120" fill="#E3F2FD" stroke="#2196F3" stroke-width="2" rx="5"/>
+      <text x="550" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#1565C0">步骤2: 递归搜索</text>
+      <text x="420" y="700" font-family="Arial, sans-serif" font-size="11" fill="#333">• 对每个子节点递归调用</text>
+      <text x="420" y="720" font-family="Arial, sans-serif" font-size="11" fill="#333">• MAX层选择最大值</text>
+      <text x="420" y="740" font-family="Arial, sans-serif" font-size="11" fill="#333">• MIN层选择最小值</text>
+      <text x="420" y="760" font-family="Arial, sans-serif" font-size="11" fill="#333">• 更新α和β值</text>
+    </g>
+    
+    <!-- 步骤3 -->
+    <g id="step3">
+      <rect x="720" y="650" width="300" height="120" fill="#FFEBEE" stroke="#FF5722" stroke-width="2" rx="5"/>
+      <text x="870" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#D32F2F">步骤3: Alpha-Beta剪枝</text>
+      <text x="740" y="700" font-family="Arial, sans-serif" font-size="11" fill="#333">• 检查剪枝条件: α ≥ β</text>
+      <text x="740" y="720" font-family="Arial, sans-serif" font-size="11" fill="#333">• 如果满足，停止搜索该分支</text>
+      <text x="740" y="740" font-family="Arial, sans-serif" font-size="11" fill="#333">• 大幅减少搜索节点数量</text>
+      <text x="740" y="760" font-family="Arial, sans-serif" font-size="11" fill="#333">• 提高算法效率</text>
+    </g>
+    
+    <!-- 步骤4 -->
+    <g id="step4">
+      <rect x="1040" y="650" width="300" height="120" fill="#F3E5F5" stroke="#9C27B0" stroke-width="2" rx="5"/>
+      <text x="1190" y="675" text-anchor="middle" font-family="Arial, sans-serif" font-size="14" font-weight="bold" fill="#7B1FA2">步骤4: 返回最佳走法</text>
+      <text x="1060" y="700" font-family="Arial, sans-serif" font-size="11" fill="#333">• 回溯到根节点</text>
+      <text x="1060" y="720" font-family="Arial, sans-serif" font-size="11" fill="#333">• 选择评估值最高的走法</text>
+      <text x="1060" y="740" font-family="Arial, sans-serif" font-size="11" fill="#333">• 执行最佳走法</text>
+      <text x="1060" y="760" font-family="Arial, sans-serif" font-size="11" fill="#333">• 更新棋盘状态</text>
+    </g>
+    
+    <!-- 性能对比 -->
+    <rect x="80" y="790" width="1260" height="140" fill="#FFF8E1" stroke="#FF9800" stroke-width="2" rx="5"/>
+    <text x="710" y="815" text-anchor="middle" font-family="Arial, sans-serif" font-size="16" font-weight="bold" fill="#E65100">算法性能对比</text>
+    
+    <text x="100" y="845" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">纯Minimax算法:</text>
+    <text x="250" y="845" font-family="Arial, sans-serif" font-size="12" fill="#333">时间复杂度 O(b^d)，其中b为分支因子，d为搜索深度</text>
+    <text x="100" y="865" font-family="Arial, sans-serif" font-size="12" fill="#333">深度3时需要搜索约 35³ ≈ 42,875 个节点</text>
+    
+    <text x="100" y="895" font-family="Arial, sans-serif" font-size="12" font-weight="bold" fill="#333">Minimax + Alpha-Beta剪枝:</text>
+    <text x="320" y="895" font-family="Arial, sans-serif" font-size="12" fill="#333">最优情况下时间复杂度 O(b^(d/2))</text>
+    <text x="100" y="915" font-family="Arial, sans-serif" font-size="12" fill="#333">深度3时仅需搜索约 35^1.5 ≈ 207 个节点，效率提升约200倍！</text>
+  </g>
+  
+  <!-- 连接线：算法树到棋盘 -->
+  <path d="M 650 300 Q 750 250 850 300" stroke="#666" stroke-width="2" fill="none" stroke-dasharray="8,4"/>
+  <text x="750" y="270" text-anchor="middle" font-family="Arial, sans-serif" font-size="12" fill="#666" font-weight="bold">算法决策对应棋盘走法</text>
+  
+</svg>

@@ -14,6 +14,7 @@ import org.apache.shiro.SecurityUtils;
 import org.jeecg.common.api.vo.Result;
 import org.jeecg.common.system.query.QueryGenerator;
 import org.jeecg.common.aspect.annotation.AutoLog;
+import org.jeecg.common.system.api.ISysBaseAPI;
 import org.jeecg.common.system.vo.LoginUser;
 import org.jeecg.common.util.oConvertUtils;
 import org.jeecg.modules.chess.game.entity.ChessGame;
@@ -83,6 +84,9 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 
 	@Autowired
 	private IChessDrawRequestService chessDrawRequestService;
+
+	@Autowired
+	private ISysBaseAPI sysBaseApi;
 
 	/**
 	 * 游戏初始化
@@ -210,11 +214,16 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 		for (ChessGameBatchVO gameVO : lstResult) {
 			String gameId = gameVO.getGameId();
 			if (gameId != null && !gameId.isEmpty()) {
+				// 获取接受邀请方的用户信息，包括头像
+				LoginUser joinedUser = sysBaseApi.getUserById(sysUser.getId());
+				String userAvatar = joinedUser != null ? joinedUser.getAvatar() : null;
+
 				Map<String, Object> messagePayload = new HashMap<>();
 				messagePayload.put("type", "PLAYER_JOINED");
 				Map<String, String> payloadData = new HashMap<>();
 				payloadData.put("userId", sysUser.getId());
 				payloadData.put("username", sysUser.getUsername());
+				payloadData.put("avatar", userAvatar);
 				payloadData.put("gameId", gameId);
 				messagePayload.put("payload", payloadData);
 				String destination = "/topic/game/" + gameId;
@@ -459,27 +468,19 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 			Map<String, Object> message = new HashMap<>();
 			message.put("type", "game_quit");
 			message.put("gameId", gameId);
+			message.put("playerId", currentUser.getId());
+			message.put("playerName", currentUser.getUsername());
 			message.put("quitPlayer", isBlackPlayer ? "black" : "white");
 			message.put("message", quitMessage);
 			message.put("gameState", newGameState);
 
-			// 通知黑方
-			if (game.getBlackPlayAccount() != null) {
-				messagingTemplate.convertAndSendToUser(
-					game.getBlackPlayAccount(),
-					"/queue/game/" + gameId,
-					message
-				);
-			}
-
-			// 通知白方
-			if (game.getWhitePlayAccount() != null) {
-				messagingTemplate.convertAndSendToUser(
-					game.getWhitePlayAccount(),
-					"/queue/game/" + gameId,
-					message
-				);
-			}
+			// 发送到游戏topic，让双方都能收到
+			messagingTemplate.convertAndSend(
+				"/topic/game/" + gameId,
+				message
+			);
+			
+			log.info("投降通知已发送到 /topic/game/{}: {}", gameId, message);
 		} catch (Exception e) {
 			log.error("发送退出游戏通知失败：{}", e.getMessage(), e);
 		}
@@ -705,7 +706,10 @@ public class ChessGameController extends JeecgController<ChessGame, IChessGameSe
 	public Result<?> requestDraw(@PathVariable("gameId") String gameId) {
 		try {
 			LoginUser currentUser = (LoginUser) SecurityUtils.getSubject().getPrincipal();
+			log.info("收到和棋请求 - 游戏ID: {}, 用户ID: {}, 用户名: {}", gameId, currentUser.getId(), currentUser.getUsername());
+			
 			String result = chessDrawRequestService.requestDraw(gameId, currentUser.getId());
+			log.info("和棋请求处理结果: {}", result);
 			
 			if ("和棋请求已发送".equals(result)) {
 				return Result.OK(result);

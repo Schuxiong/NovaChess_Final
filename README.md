@@ -11,10 +11,10 @@
     <img src="https://img.shields.io/badge/平台-Web%20%7C%20小程序%20%7C%20App-orange" alt="平台" />
     <img src="https://img.shields.io/badge/Java-8%2B-red" alt="Java" />
     <img src="https://img.shields.io/badge/Vue.js-3.x-brightgreen" alt="Vue" />
+    <a href="https://deepwiki.com/Schuxiong/NovaChess_Final"><img src="https://deepwiki.com/badge.svg" alt="Ask DeepWiki"></a>
   </p>
 </div>
 
-[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/Schuxiong/NovaChess_Final)
 
 ## 📋 项目简介
 
@@ -33,7 +33,31 @@ NovaChess 是一个功能完善的国际象棋应用程序，采用前后端分�
 
 ### 系统架构图
 
-![NovaChess架构图](./NovaChess-Architecture.svg)
+![NovaChess架构图](./NovaChess-Architecture.png)
+
+### 功能模块图
+
+![NovaChess功能模块](./NovaChess-Functional-Modules.svg)
+
+### 数据库架构图
+
+![NovaChess数据库架构](./NovaChess-Database-Architecture.svg)
+
+### 前端架构图
+
+![NovaChess前端架构](./NovaChess-Frontend-Architecture.svg)
+
+### Minimax算法实现
+
+![Minimax Alpha-Beta算法](./Minimax-Alpha-Beta-Chess-Algorithm.svg)
+
+### Stockfish集成实现
+
+![NovaChess Stockfish实现](./NovaChess-Stockfish-Implementation.png)
+
+### LLM应用架构
+
+![NovaChess LLM应用](./NovaChess-LLM-Application.png)
 
 ### 项目组成
 
@@ -58,10 +82,6 @@ NovaChess 是一个功能完善的国际象棋应用程序，采用前后端分�
 - **`sql/`**: 数据迁移和修复脚本集合
 - **数据库**: MySQL 5.7+ 支持
 
-#### 🔧 辅助工具
-- **`testSocket.html`**: WebSocket连接测试工具
-- **`NovaChess-Architecture.svg`**: 系统架构图
-- **配置文件**: 各种环境配置和部署脚本
 
 ## 💻 技术栈
 
@@ -102,30 +122,6 @@ NovaChess 是一个功能完善的国际象棋应用程序，采用前后端分�
 - **Gateway**: API网关
 - **Sentinel**: 流量控制与熔断
 
-### 🗄️ 数据库设计
-
-#### 核心数据表
-
-| 表名 | 功能 | 说明 |
-|------|------|------|
-| **课程系统** | | |
-| `chess_courses` | 课程管理 | 国际象棋教学课程 |
-| `chess_course_steps` | 课程步骤 | 课程的具体学习步骤 |
-| `chess_board_setups` | 棋盘设置 | 课程中的棋盘布局 |
-| **对局系统** | | |
-| `chess_game` | 对局记录 | 游戏对局的基本信息 |
-| `chess_move` | 走棋记录 | 每一步棋的详细记录 |
-| `chess_pieces` | 棋子状态 | 棋盘上棋子的位置状态 |
-| `chess_player` | 玩家信息 | 对局中的玩家信息 |
-| **社交系统** | | |
-| `chess_friend_pair` | 好友关系 | 好友约战功能 |
-| **积分系统** | | |
-| `chess_player_score` | 玩家积分 | 用户积分和等级 |
-| `chess_player_score_record` | 积分记录 | 积分变化历史 |
-| **系统管理** | | |
-| `sys_user` | 用户管理 | 系统用户信息 |
-| `sys_depart` | 部门管理 | 组织架构 |
-| `sys_message` | 消息管理 | 系统通知和消息 |
 
 ### 3.4. 版本控制
 
@@ -353,174 +349,199 @@ cd jeecg-boot
 docker-compose up -d
 ```
 
+## 🚀 生产环境部署
+
+### ☁️ 后端云服务器部署
+
+#### 1. 查看和管理进程
+
+```bash
+# 查看当前运行的后端进程
+ps aux | grep jeecg-system-start-3.7.4.jar
+
+# 查看实时日志
+tail -f output.log
+
+# 停止进程（替换pid为实际进程ID）
+kill -9 pid
+```
+
+#### 2. 项目编译和部署
+
+```bash
+# 进入项目目录
+cd /home/NovaChess_Final/jeecg-boot
+
+# 清理并编译项目（跳过测试）
+mvn clean package -DskipTests
+
+# 进入jar包目录
+cd /home/NovaChess_Final/jeecg-boot/jeecg-module-system/jeecg-system-start/target
+
+# 后台运行jar包并输出日志
+nohup java -jar jeecg-system-start-3.7.4.jar >output.log 2>&1 &
+```
+
+#### 3. 部署验证
+
+```bash
+# 检查服务是否启动成功
+ps aux | grep jeecg-system-start-3.7.4.jar
+
+# 查看启动日志
+tail -f output.log
+
+# 测试API接口
+curl http://localhost:8080/sys/common/403
+```
+
+### 🌐 前端部署发布
+
+#### 1. 项目打包
+
+使用HBuilderX进行项目打包：
+
+1. 打开HBuilderX
+2. 导入NovaChess-App项目
+3. 选择发行 → H5-手机版
+4. 配置发行参数
+5. 点击发行，生成dist目录
+
+#### 2. 文件上传
+
+```bash
+# 将打包后的文件压缩
+zip -r novachess-frontend.zip dist/
+
+# 上传到阿里云服务器
+scp novachess-frontend.zip root@47.111.122.119:/web/
+
+# 在服务器上解压
+ssh root@47.111.122.119
+cd /web
+unzip novachess-frontend.zip
+mv dist/* ./
+rm -rf dist novachess-frontend.zip
+```
+
+#### 3. Nginx配置
+
+创建或编辑Nginx配置文件 `/etc/nginx/sites-available/novachess`：
+
+```nginx
+server {
+    listen 80;                  # 监听 HTTP 80 端口
+    server_name 47.111.122.119; # 替换为你的服务器公网 IP 或备案域名
+
+    # 前端静态文件配置
+    location / {
+        root /web;              # 前端文件存放目录（你的 /web 文件夹）
+        index index.html;       # 入口文件
+        try_files $uri $uri/ /index.html; # 解决 UniApp 路由刷新 404 问题
+
+        # 静态资源缓存优化（可选）
+        if ($request_filename ~* .*\.(js|css|png|jpg|jpeg|gif|ico|svg)$) {
+            expires 7d;        # 静态文件缓存 7 天
+            add_header Cache-Control "public";
+        }
+        if ($request_filename = /index.html) {
+            expires 0;         # index.html 不缓存（及时更新）
+        }
+    }
+
+    # 后端 API 代理（关键！将 /prod-api 转发到后端）
+    location /prod-api/ {
+        proxy_pass http://47.111.122.119:8080/;  # 后端服务地址（替换为实际地址）
+        proxy_set_header Host $host;            # 保留原始 Host 头
+        proxy_set_header X-Real-IP $remote_addr;# 传递客户端真实 IP
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme; # 传递协议（HTTP/HTTPS）
+    }
+}
+```
+
+#### 4. 启用配置并重启Nginx
+
+```bash
+# 创建软链接启用站点
+sudo ln -s /etc/nginx/sites-available/novachess /etc/nginx/sites-enabled/
+
+# 测试Nginx配置
+sudo nginx -t
+
+# 重启Nginx服务
+sudo systemctl restart nginx
+
+# 检查Nginx状态
+sudo systemctl status nginx
+```
+
+#### 5. 安全组配置
+
+在阿里云控制台配置安全组规则：
+
+1. 登录阿里云控制台
+2. 进入ECS实例管理
+3. 选择安全组 → 配置规则
+4. 添加入方向规则：
+   - 端口范围：80/80
+   - 授权对象：0.0.0.0/0
+   - 协议类型：TCP
+5. 添加入方向规则：
+   - 端口范围：8080/8080
+   - 授权对象：0.0.0.0/0
+   - 协议类型：TCP
+
+#### 6. 部署验证
+
+```bash
+# 检查端口监听状态
+sudo netstat -tlnp | grep :80
+sudo netstat -tlnp | grep :8080
+
+# 测试前端访问
+curl http://47.111.122.119/
+
+# 测试后端API
+curl http://47.111.122.119/prod-api/sys/common/403
+```
+
+### 📋 部署检查清单
+
+#### 后端部署检查
+- [ ] MySQL数据库正常运行
+- [ ] Redis服务正常运行（如果使用）
+- [ ] 后端jar包成功启动
+- [ ] 8080端口正常监听
+- [ ] API接口正常响应
+- [ ] WebSocket连接正常
+
+#### 前端部署检查
+- [ ] 静态文件正确上传
+- [ ] Nginx配置正确
+- [ ] 80端口正常监听
+- [ ] 前端页面正常访问
+- [ ] API代理配置正确
+- [ ] 安全组规则配置完成
+
+### 🔧 常见部署问题
+
+#### 后端问题
+1. **端口被占用**：使用 `lsof -i:8080` 查看端口占用
+2. **内存不足**：调整JVM参数 `-Xmx512m`
+3. **数据库连接失败**：检查数据库配置和网络连接
+
+#### 前端问题
+1. **404错误**：检查Nginx配置中的 `try_files` 设置
+2. **API调用失败**：检查代理配置和后端服务状态
+3. **静态资源加载失败**：检查文件路径和权限设置
+
 ### 🔧 开发工具配置
 
 #### IDEA配置
 1. 安装Lombok插件
 2. 启用注解处理器
 3. 设置代码格式化规则
-
-#### WebSocket测试
-使用 `testSocket.html` 测试WebSocket连接：
-```html
-<!-- 修改连接地址 -->
-const socket = new SockJS('http://localhost:8080/ws');
-```
-
-## 🌐 API 和通信
-
-### 📡 通信架构
-
-NovaChess 采用混合通信模式，结合 RESTful API 和 WebSocket 实现高效的数据交互：
-
-```
-前端应用 ←→ API网关 ←→ 后端服务
-    ↓           ↓         ↓
-WebSocket ←→ STOMP ←→ 消息处理器
-```
-
-### 🔌 WebSocket 实时通信
-
-#### 连接配置
-```javascript
-// 连接地址
-const WEBSOCKET_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://47.111.122.119:8080/ws' 
-  : 'http://localhost:8080/ws';
-
-// 使用 SockJS + STOMP 协议
-import { connectWebSocket, subscribeToTopic, sendMessage } from '@/utils/websocket.js';
-```
-
-#### 核心功能端点
-
-| 功能 | 发送地址 | 订阅地址 | 说明 |
-|------|----------|----------|------|
-| **棋盘状态** | `/app/chessboard` | `/topic/chessboard` | 获取当前棋盘状态 |
-| **走棋操作** | `/app/movepieces` | `/topic/game/{gameId}` | 处理走棋并广播 |
-| **游戏通知** | - | `/topic/game/{gameId}` | 游戏状态变化通知 |
-| **用户消息** | - | `/topic/user/{userId}` | 个人消息通知 |
-
-#### 消息格式
-
-**走棋请求**:
-```json
-{
-  "gameId": "game123",
-  "userId": "user456",
-  "from": "e2",
-  "to": "e4",
-  "piece": "pawn",
-  "moveType": "normal"
-}
-```
-
-**走棋响应**:
-```json
-{
-  "type": "MOVE_UPDATE",
-  "data": {
-    "gameId": "game123",
-    "currentPlayer": "white",
-    "boardState": "rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR",
-    "lastMove": {
-      "from": "e2",
-      "to": "e4",
-      "piece": "pawn"
-    },
-    "gameStatus": "ongoing"
-  }
-}
-```
-
-### 🔗 RESTful API
-
-#### 认证相关
-```
-POST /sys/login          # 用户登录
-POST /sys/logout         # 用户登出
-GET  /sys/user/info      # 获取用户信息
-```
-
-#### 游戏相关
-```
-GET    /chess/game/list           # 获取游戏列表
-POST   /chess/game/create         # 创建新游戏
-GET    /chess/game/{id}           # 获取游戏详情
-POST   /chess/game/{id}/join      # 加入游戏
-POST   /chess/game/{id}/move      # 走棋（备用API）
-GET    /chess/game/{id}/history   # 获取走棋历史
-```
-
-#### 用户相关
-```
-GET    /chess/player/profile      # 获取玩家资料
-PUT    /chess/player/profile      # 更新玩家资料
-GET    /chess/player/score        # 获取积分信息
-GET    /chess/player/games        # 获取历史对局
-```
-
-#### 课程相关
-```
-GET    /chess/course/list         # 获取课程列表
-GET    /chess/course/{id}         # 获取课程详情
-POST   /chess/course/{id}/progress # 更新学习进度
-```
-
-### 📚 API 文档
-
-- **Swagger UI**: http://localhost:8080/doc.html
-- **API 文档**: 详细的接口文档和测试界面
-- **WebSocket 说明**: 参考 `NovaChess-App/WebSocket调用说明.md`
-- **业务流程**: 参考 `NovaChess-App/websocket业务流程.md`
-
-### 🔒 安全机制
-
-#### JWT 认证
-```javascript
-// 请求头设置
-headers: {
-  'Authorization': 'Bearer ' + token,
-  'Content-Type': 'application/json'
-}
-```
-
-#### CORS 配置
-```yaml
-# 跨域配置
-jeecg:
-  cors:
-    allowed-origins: "*"
-    allowed-methods: "*"
-    allowed-headers: "*"
-```
-
-### 🧪 测试工具
-
-#### WebSocket 测试
-使用 `testSocket.html` 进行连接测试：
-```html
-<!DOCTYPE html>
-<html>
-<head>
-    <title>WebSocket Test</title>
-</head>
-<body>
-    <script>
-        const socket = new SockJS('http://localhost:8080/ws');
-        const stompClient = Stomp.over(socket);
-        
-        stompClient.connect({}, function(frame) {
-            console.log('Connected: ' + frame);
-            // 订阅测试
-            stompClient.subscribe('/topic/test', function(message) {
-                console.log('Received: ' + message.body);
-            });
-        });
-    </script>
-</body>
-</html>
-```
 
 ## 📄 许可证
 
@@ -614,10 +635,10 @@ A:
 感谢所有为NovaChess项目做出贡献的开发者！
 
 ### 核心贡献者
-- **项目负责人**: [LucusorShan](https://github.com/LucusorShan)
-- **前端开发**: NovaChess前端团队
-- **后端开发**: NovaChess后端团队
-- **AI集成**: 智能机器人开发团队
+- **项目负责人**: [Lucas Shan 单楚雄](https://github.com/Schuxiong)
+- **前端开发**: [Lucas Shan 单楚雄](https://github.com/Schuxiong)
+- **后端开发**: [Lucas Shan 单楚雄](https://github.com/Schuxiong)
+- **AI集成**: [Lucas Shan 单楚雄](https://github.com/Schuxiong)
 
 ### 特别感谢
 - **JeecgBoot团队**: 提供优秀的低代码开发平台
